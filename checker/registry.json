@@ -11,7 +11,8 @@
   "off_property_hosts": ["code.claude.com", "support.claude.com"],
   "dedicated_task_pages": [
     "https://support.claude.com/en/articles/13837440-use-plugins-in-claude",
-    "https://code.claude.com/docs/en/discover-plugins"
+    "https://code.claude.com/docs/en/discover-plugins",
+    "https://code.claude.com/docs/en/plugins-reference"
   ],
   "ownership_cues": ["owns", "authoring home", "reference", "canonical", "source of truth", "own the", "owns the", "home for", "owns authoring"]
 }

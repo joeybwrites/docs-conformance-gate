@@ -80,6 +80,18 @@ def check_page(path: Path, reg: dict) -> list[dict]:
     canonical = {c.lower() for c in (meta.get("canonical_for") or [])}
     findings: list[dict] = []
 
+    # Input contract: the gate expects one actual doc page with top-level
+    # frontmatter. A file with none (a pre-standard page, or a meta-doc such as
+    # a before/after) has no `assumes`/`canonical_for` to honor, so its S4
+    # results may be phantoms. Announce that rather than silently over-flagging.
+    if not meta:
+        findings.append({
+            "rule": "FM", "line": 1, "subject": "",
+            "detail": "no frontmatter parsed; the standard expects "
+                      "title/content-type/assumes/canonical_for. Exemptions are "
+                      "inactive, so any S4 concept findings below may be phantoms.",
+        })
+
     all_targets = [url for ln in body for _t, url in
                    ((m.group(1), m.group(2)) for m in LINK_RE.finditer(ln))]
 
@@ -123,8 +135,15 @@ def check_page(path: Path, reg: dict) -> list[dict]:
             base = url.split("#")[0].rstrip("/")
             registered = base in task_pages
             has_anchor = "#" in url
-            words_before = len(re.findall(r"\w+", ln[:m.start()]))
-            framed = any(c in window for c in cues) or (registered and words_before >= 6)
+            cue_present = any(c in window for c in cues)
+            if registered:
+                # A registered destination is an intentional handoff target;
+                # a descriptive (>=2-word) label frames it adequately.
+                framed = cue_present or len(re.findall(r"\w+", m.group(1))) >= 2
+            else:
+                # An arbitrary off-property link needs an ownership cue or a
+                # real summary clause (>=6 words) before it.
+                framed = cue_present or len(re.findall(r"\w+", ln[:m.start()])) >= 6
             problems = []
             if not (has_anchor or registered):
                 problems.append("no #anchor and not a registered task page")

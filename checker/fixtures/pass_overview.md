@@ -28,7 +28,7 @@ A plugin can combine several component types. The table below explains the job e
 | [**Sub-agents**](https://code.claude.com/docs/en/plugins-reference#agents) | Delegated work with a bounded role and context |
 | [**Hooks**](https://code.claude.com/docs/en/plugins-reference#hooks) | Actions that run at defined points in a workflow |
 
-Claude Code supports additional plugin components and configuration. The [plugins reference](https://code.claude.com/docs/en/plugins-reference#version-management) is the source of truth when you need exact schemas, paths, scopes, CLI behavior, syncing, caching, or versioning.
+Claude Code supports additional plugin components and configuration. The [plugins reference](https://code.claude.com/docs/en/plugins-reference) is the source of truth when you need exact schemas, paths, scopes, CLI behavior, syncing, caching, or versioning.
 
 ## The plugin lifecycle
 
