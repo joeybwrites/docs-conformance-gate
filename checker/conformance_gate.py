@@ -162,7 +162,25 @@ def check_page(path: Path, reg: dict) -> list[dict]:
                 "rule": "S6", "line": idx + 1, "subject": "",
                 "detail": "doubled '/docs/docs/' link prefix",
             })
+
+    # ---- S3: contradiction of the evidenced state (Block) ----
+    # Curated + configurable: registry `contradiction_patterns` are claims known
+    # to contradict the matrix's evidenced state. Deterministic (regex), and a
+    # LEVER the docs/product team edits as truths shift or conflicts are found.
+    # (The fuller design compares structured claims to the matrix directly.)
+    body_text = "\n".join(body)
+    for cp in reg.get("contradiction_patterns", []):
+        m = re.search(cp["pattern"], body_text, re.IGNORECASE)
+        if m:
+            line = body_off + body_text[:m.start()].count("\n") + 1
+            findings.append({
+                "rule": "S3", "line": line, "subject": cp["id"],
+                "detail": cp["reason"], "note": cp.get("note", ""),
+            })
     return findings
+
+
+_SKIP_NAMES = {"readme.md", "notes.md"}  # repo meta-files, not doc pages
 
 
 def collect(paths):
@@ -170,10 +188,25 @@ def collect(paths):
     for p in paths:
         pp = Path(p)
         if pp.is_dir():
-            files.extend(sorted(pp.glob("*.md")))
+            files.extend(sorted(f for f in pp.glob("*.md")
+                                if f.name.lower() not in _SKIP_NAMES))
         else:
-            files.append(pp)
+            files.append(pp)  # explicit path is honored as-is
     return files
+
+
+def verdict_for(findings, reg):
+    """Non-compensating verdict: a page's disposition is its WORST finding's
+    tier. Severities and tier names come from registry.json, so they are
+    adjustable levers rather than hard-coded policy. Returns (verdict, severity)."""
+    order = reg["severity_order"]
+    sev_map = reg["severities"]
+    worst = "clean"
+    for f in findings:
+        sev = sev_map.get(f["rule"], "revise")
+        if sev in order and order.index(sev) > order.index(worst):
+            worst = sev
+    return reg["verdicts"][worst], worst
 
 
 def main():
@@ -185,23 +218,29 @@ def main():
 
     reg = load_registry(Path(args.registry))
     results = {str(f): check_page(f, reg) for f in collect(args.paths)}
+    verdicts = {f: verdict_for(finds, reg) for f, finds in results.items()}
+    # Non-blocking tiers (Ship / Ship with Notes) pass CI; Revise / Reject block.
+    blocking = sum(1 for _v, sev in verdicts.values() if sev in ("revise", "block"))
 
     if args.json:
-        print(json.dumps(results, indent=2))
+        out = {f: {"verdict": verdicts[f][0], "severity": verdicts[f][1], "findings": finds}
+               for f, finds in results.items()}
+        print(json.dumps(out, indent=2))
     else:
         for f, finds in results.items():
             name = Path(f).name
-            if not finds:
-                print(f"PASS  {name}")
-                continue
-            print(f"FAIL  {name}  ({len(finds)} finding(s))")
+            verdict, _sev = verdicts[f]
+            suffix = f"  ({len(finds)} finding(s))" if finds else ""
+            print(f"{verdict.upper():<16}{name}{suffix}")
             for fd in sorted(finds, key=lambda x: (x["line"], x["rule"])):
                 s = f' [{fd["subject"]}]' if fd["subject"] else ""
                 print(f'    {fd["rule"]}  line {fd["line"]}{s}: {fd["detail"]}')
-        n_failed = sum(1 for v in results.values() if v)
-        print(f"\n{n_failed} of {len(results)} file(s) with findings.")
+                if fd.get("note"):
+                    print(f'        note to owner: {fd["note"]}')
+        print(f"\n{blocking} of {len(results)} file(s) block (Revise or Reject); "
+              f"Ship / Ship with Notes pass CI.")
 
-    sys.exit(min(sum(1 for v in results.values() if v), 100))
+    sys.exit(min(blocking, 100))
 
 
 if __name__ == "__main__":

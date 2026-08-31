@@ -1,49 +1,62 @@
 # Conformance gate - sample run output
 
-## Fixtures (pass_overview clean; fail_* each fire their rule)
+## Verdict ladder (fixtures/verdicts/) - one variant per tier, with note to owner
 ```
-FAIL  fail_s4_unbridged.md  (5 finding(s))
+REJECT          verdict_reject.md  (1 finding(s))
+    S3  line 27 [chat-availability-settled]: Asserts plugin availability in Chat as settled fact, but the matrix records Chat availability as a LIVE contradiction between the support guidance and cowork/guide/plugins.
+        note to owner: Do not state Chat availability as settled until the product owner resolves the conflict. Describe it as unresolved and link the support matrix.
+REVISE          verdict_revise.md  (1 finding(s))
+    S5  line 27 [https://code.claude.com/docs/en/plugins]: off-property handoff: no #anchor and not a registered task page; no ownership/summary framing nearby
+SHIP            verdict_ship.md
+SHIP WITH NOTES verdict_ship_with_notes.md  (1 finding(s))
+    S6  line 31: doubled '/docs/docs/' link prefix
+
+2 of 4 file(s) block (Revise or Reject); Ship / Ship with Notes pass CI.
+```
+
+## Rule fixtures (verdicts applied)
+```
+REVISE          fail_s4_unbridged.md  (5 finding(s))
     S4  line 9 [skill]: "skill" is used but never linked to its owner (skills/overview); it is not in assumes/canonical_for
     S4  line 9 [connector]: "connector" is used but never linked to its owner (connectors/overview); it is not in assumes/canonical_for
     S4  line 9 [slash command]: "slash command" is used but never linked to its owner (plugins-reference#skills); it is not in assumes/canonical_for
     S4  line 9 [sub-agent]: "sub-agent" is used but never linked to its owner (plugins-reference#agents); it is not in assumes/canonical_for
     S4  line 9 [hook]: "hook" is used but never linked to its owner (plugins-reference#hooks); it is not in assumes/canonical_for
-FAIL  fail_s5_unframed.md  (2 finding(s))
+REVISE          fail_s5_unframed.md  (2 finding(s))
     S5  line 13 [https://code.claude.com/docs/en/plugins]: off-property handoff: no #anchor and not a registered task page; no ownership/summary framing nearby
     S5  line 15 [https://code.claude.com/docs/en/plugins-reference]: off-property handoff: no ownership/summary framing nearby
-FAIL  fail_s6_doubled_prefix.md  (2 finding(s))
+SHIP WITH NOTES fail_s6_doubled_prefix.md  (2 finding(s))
     S6  line 9: doubled '/docs/docs/' link prefix
     S6  line 11: doubled '/docs/docs/' link prefix
-PASS  pass_overview.md
+SHIP            pass_overview.md
 
-3 of 4 file(s) with findings.
+2 of 4 file(s) block (Revise or Reject); Ship / Ship with Notes pass CI.
 ```
 
-## Input-contract demo: running on the before/after META-doc (not a page)
-# The FM finding announces there is no page frontmatter; the lone S4 is the phantom it warns about.
+## Input-contract demo: the before/after META-doc (FM announces missing frontmatter)
 ```
-FAIL  plugin_overview_before_after.md  (2 finding(s))
+REVISE          plugin_overview_before_after.md  (2 finding(s))
     FM  line 1: no frontmatter parsed; the standard expects title/content-type/assumes/canonical_for. Exemptions are inactive, so any S4 concept findings below may be phantoms.
     S4  line 1 [plugin]: "plugin" is used but never linked to its owner (plugins/overview); it is not in assumes/canonical_for
 
-1 of 1 file(s) with findings.
+1 of 1 file(s) block (Revise or Reject); Ship / Ship with Notes pass CI.
 ```
 
-## Real corpus (live claude.com/docs pages via fetch_corpus.py; pre-standard, so each carries an FM finding)
+## Real corpus (live pages via fetch_corpus.py; pre-standard, so each carries FM)
 ```
-FAIL  connectors_overview.md  (4 finding(s))
+REVISE          connectors_overview.md  (4 finding(s))
     FM  line 1: no frontmatter parsed; the standard expects title/content-type/assumes/canonical_for. Exemptions are inactive, so any S4 concept findings below may be phantoms.
     S4  line 5 [connector]: "connector" is used but never linked to its owner (connectors/overview); it is not in assumes/canonical_for
     S4  line 58 [slash command]: "slash command" is used but never linked to its owner (plugins-reference#skills); it is not in assumes/canonical_for
     S4  line 58 [sub-agent]: "sub-agent" is used but never linked to its owner (plugins-reference#agents); it is not in assumes/canonical_for
-FAIL  cowork_guide_plugins.md  (6 finding(s))
+REVISE          cowork_guide_plugins.md  (6 finding(s))
     FM  line 1: no frontmatter parsed; the standard expects title/content-type/assumes/canonical_for. Exemptions are inactive, so any S4 concept findings below may be phantoms.
     S4  line 7 [skill]: "skill" is used but never linked to its owner (skills/overview); it is not in assumes/canonical_for
     S4  line 7 [connector]: "connector" is used but never linked to its owner (connectors/overview); it is not in assumes/canonical_for
     S4  line 9 [slash command]: "slash command" is used but never linked to its owner (plugins-reference#skills); it is not in assumes/canonical_for
     S4  line 9 [sub-agent]: "sub-agent" is used but never linked to its owner (plugins-reference#agents); it is not in assumes/canonical_for
     S4  line 9 [hook]: "hook" is used but never linked to its owner (plugins-reference#hooks); it is not in assumes/canonical_for
-FAIL  docs_home.md  (30 finding(s))
+REVISE          docs_home.md  (30 finding(s))
     FM  line 1: no frontmatter parsed; the standard expects title/content-type/assumes/canonical_for. Exemptions are inactive, so any S4 concept findings below may be phantoms.
     S4  line 16 [connector]: "connector" is used but never linked to its owner (connectors/overview); it is not in assumes/canonical_for
     S6  line 16: doubled '/docs/docs/' link prefix
@@ -74,14 +87,14 @@ FAIL  docs_home.md  (30 finding(s))
     S6  line 248: doubled '/docs/docs/' link prefix
     S6  line 294: doubled '/docs/docs/' link prefix
     S6  line 295: doubled '/docs/docs/' link prefix
-FAIL  plugins_overview.md  (6 finding(s))
+REVISE          plugins_overview.md  (6 finding(s))
     FM  line 1: no frontmatter parsed; the standard expects title/content-type/assumes/canonical_for. Exemptions are inactive, so any S4 concept findings below may be phantoms.
     S4  line 5 [plugin]: "plugin" is used but never linked to its owner (plugins/overview); it is not in assumes/canonical_for
     S4  line 7 [slash command]: "slash command" is used but never linked to its owner (plugins-reference#skills); it is not in assumes/canonical_for
     S4  line 7 [sub-agent]: "sub-agent" is used but never linked to its owner (plugins-reference#agents); it is not in assumes/canonical_for
     S5  line 39 [https://code.claude.com/docs/en/plugins]: off-property handoff: no #anchor and not a registered task page; no ownership/summary framing nearby
     S5  line 47 [https://support.claude.com/en/articles/13345190-getting-started-with-cowork]: off-property handoff: no #anchor and not a registered task page; no ownership/summary framing nearby
-FAIL  plugins_submit.md  (11 finding(s))
+REVISE          plugins_submit.md  (11 finding(s))
     FM  line 1: no frontmatter parsed; the standard expects title/content-type/assumes/canonical_for. Exemptions are inactive, so any S4 concept findings below may be phantoms.
     S4  line 5 [plugin]: "plugin" is used but never linked to its owner (plugins/overview); it is not in assumes/canonical_for
     S4  line 9 [connector]: "connector" is used but never linked to its owner (connectors/overview); it is not in assumes/canonical_for
@@ -94,5 +107,5 @@ FAIL  plugins_submit.md  (11 finding(s))
     S5  line 55 [https://support.claude.com/en/articles/13145358-anthropic-software-directory-policy]: off-property handoff: no #anchor and not a registered task page; no ownership/summary framing nearby
     S5  line 91 [https://code.claude.com/docs/en/plugins]: off-property handoff: no #anchor and not a registered task page
 
-5 of 5 file(s) with findings.
+5 of 5 file(s) block (Revise or Reject); Ship / Ship with Notes pass CI.
 ```

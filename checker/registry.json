@@ -14,5 +14,25 @@
     "https://code.claude.com/docs/en/discover-plugins",
     "https://code.claude.com/docs/en/plugins-reference"
   ],
-  "ownership_cues": ["owns", "authoring home", "reference", "canonical", "source of truth", "own the", "owns the", "home for", "owns authoring"]
+  "ownership_cues": ["owns", "authoring home", "reference", "canonical", "source of truth", "own the", "owns the", "home for", "owns authoring"],
+
+  "_levers_comment": "ADJUSTABLE LEVERS. The verdict schema is configuration, not code: retune which rule maps to which severity, rename the tiers, or add contradiction_patterns without touching conformance_gate.py. Non-compensating: a page's verdict is its WORST finding's tier, so clean prose never offsets a Block.",
+  "severities": {"S3": "block", "S2": "revise", "S4": "revise", "S5": "revise", "FM": "revise", "S6": "note"},
+  "severity_order": ["clean", "note", "revise", "block"],
+  "verdicts": {"clean": "Ship", "note": "Ship with Notes", "revise": "Revise", "block": "Reject"},
+
+  "contradiction_patterns": [
+    {
+      "id": "chat-availability-settled",
+      "pattern": "plugins?[^.\\n]{0,60}\\b(are|is)\\b[^.\\n]{0,40}\\b(available|supported)\\b[^.\\n]{0,20}\\b(in|on)\\b[^.\\n]{0,12}chat",
+      "reason": "Asserts plugin availability in Chat as settled fact, but the matrix records Chat availability as a LIVE contradiction between the support guidance and cowork/guide/plugins.",
+      "note": "Do not state Chat availability as settled until the product owner resolves the conflict. Describe it as unresolved and link the support matrix."
+    },
+    {
+      "id": "org-management-shipped",
+      "pattern": "(organization|org)[- ]?wide[^.\\n]{0,40}(management|sharing)[^.\\n]{0,24}\\b(is|are)\\b[^.\\n]{0,12}(now )?(available|shipped|live|supported)",
+      "reason": "Asserts org-wide plugin management as shipped, contradicting plugins/overview, which says it is 'coming in the weeks ahead'.",
+      "note": "Reconcile with the availability owner: either the 'coming soon' copy is stale or this claim is premature. Do not publish both."
+    }
+  ]
 }

@@ -11,6 +11,7 @@ The full rule set and the designed-but-not-built gate (the page classifier, term
 | **S4** | Prerequisite bridging — every core concept a page uses that isn't in its `assumes:` (or that it's `canonical_for:`) must link to that concept's owner |
 | **S5** | Contextualized cross-property handoff — an off-property link must be framed and either carry a `#anchor` or target a registered dedicated destination |
 | **S6** | Link form (bonus) — no doubled `/docs/docs/` prefixes |
+| **S3** | Contradiction of the evidenced state (Block) — flags a claim that contradicts the matrix; curated, configurable `contradiction_patterns` |
 | **FM** | Input contract — the file has no parseable top-level frontmatter (see below) |
 
 Declared inputs live in `registry.json` (concept→owner registry, off-property hosts, dedicated destinations, ownership cues) and in each page's `assumes:` / `canonical_for:` / `content-type:` frontmatter — all maintained *with* the docs.
@@ -18,6 +19,19 @@ Declared inputs live in `registry.json` (concept→owner registry, off-property 
 ## Input contract
 
 The gate expects **one actual doc page with top-level frontmatter.** When a file has none — a pre-standard live page, or a meta-doc like `standards/plugin_overview_before_after.md` — the `assumes:`/`canonical_for:` exemptions can't apply, so the gate emits an **FM** finding and any S4 concept findings on that file may be phantoms (e.g. "plugin" flagged on the plugins page itself). Run the gate on pages, not on meta-docs. This behavior was added *because* rigor-testing against the real before/after doc produced phantom S4s — the FM finding makes that failure legible instead of silent.
+
+## Verdict schema (adjustable levers)
+
+Findings roll up into one **non-compensating** verdict per page — the page's tier is its *worst* finding, so clean prose never offsets a contradiction (tiers over a score, on purpose).
+
+| Verdict | Triggered by | CI |
+|---|---|---|
+| **Ship** | no findings | pass |
+| **Ship with Notes** | only `note`-severity findings (S6 link form) | pass |
+| **Revise** | any `revise`-severity finding (S4, S5, FM) | block |
+| **Reject** | any `block`-severity finding (S3 contradiction) | block |
+
+**These are levers, not hard-coded policy.** The rule→severity map, the tier names, and the S3 `contradiction_patterns` all live in `registry.json` — retune severities, rename tiers, or add contradictions without touching `conformance_gate.py`. Worked examples of each tier, with the note the gate returns to the owning team, are in `fixtures/verdicts/` (see its `NOTES.md`).
 
 ## Run it
 
