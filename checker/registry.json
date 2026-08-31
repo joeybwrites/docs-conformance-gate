@@ -17,7 +17,7 @@
   "ownership_cues": ["owns", "authoring home", "reference", "canonical", "source of truth", "own the", "owns the", "home for", "owns authoring"],
 
   "_levers_comment": "ADJUSTABLE LEVERS. The verdict schema is configuration, not code: retune which rule maps to which severity, rename the tiers, or add contradiction_patterns without touching conformance_gate.py. Non-compensating: a page's verdict is its WORST finding's tier, so clean prose never offsets a Block.",
-  "severities": {"S3": "block", "S2": "revise", "S4": "revise", "S5": "revise", "FM": "revise", "S6": "note"},
+  "severities": {"S3": "revise", "S2": "revise", "S4": "revise", "S5": "revise", "FM": "revise", "S6": "note"},
   "severity_order": ["clean", "note", "revise", "block"],
   "verdicts": {"clean": "Ship", "note": "Ship with Notes", "revise": "Revise", "block": "Reject"},
   "batch_clauses": {

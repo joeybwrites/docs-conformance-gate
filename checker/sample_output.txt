@@ -1,40 +1,15 @@
 # Conformance gate - sample run output
 
-## Verdict ladder (fixtures/verdicts/) - one per tier + batch verdict
+## All fixtures (recursive): python conformance_gate.py fixtures/
 ```
-REJECT          verdict_reject.md  (1 finding(s))
-    S3  line 27 [chat-availability-settled]: Asserts plugin availability in Chat as settled fact, but the matrix records Chat availability as a LIVE contradiction between the support guidance and cowork/guide/plugins.
-        note to owner: Do not state Chat availability as settled until the product owner resolves the conflict. Describe it as unresolved and link the support matrix.
-REVISE          verdict_revise.md  (1 finding(s))
-    S5  line 27 [https://code.claude.com/docs/en/plugins]: off-property handoff: no #anchor and not a registered task page; no ownership/summary framing nearby
-SHIP            verdict_ship.md
-SHIP WITH NOTES verdict_ship_with_notes.md  (1 finding(s))
-    S6  line 31: doubled '/docs/docs/' link prefix
-
-2 of 4 file(s) block (Revise or Reject); Ship / Ship with Notes pass CI.
-BATCH VERDICT: REJECT - the batch is blocked; a page contradicts the estate and must be resolved before any page in the set ships.
-```
-
-## Rigor: non-compensating (note+block=Reject) and code-fence (examples ignored)
-```
-SHIP            code_fence_examples.md
-REJECT          mixed_note_and_block.md  (2 finding(s))
-    S6  line 11: doubled '/docs/docs/' link prefix
-    S3  line 15 [chat-availability-settled]: Asserts plugin availability in Chat as settled fact, but the matrix records Chat availability as a LIVE contradiction between the support guidance and cowork/guide/plugins.
-        note to owner: Do not state Chat availability as settled until the product owner resolves the conflict. Describe it as unresolved and link the support matrix.
-
-1 of 2 file(s) block (Revise or Reject); Ship / Ship with Notes pass CI.
-BATCH VERDICT: REJECT - the batch is blocked; a page contradicts the estate and must be resolved before any page in the set ships.
-```
-
-## Rule fixtures (verdicts applied)
-```
+REVISE          fail_s4_first_mention.md  (1 finding(s))
+    S4  line 9 [skill]: "skill" first appears here but this mention does not link to its owner (skills/overview); the first mention must carry the link (not in assumes/canonical_for)
 REVISE          fail_s4_unbridged.md  (5 finding(s))
-    S4  line 9 [skill]: "skill" is used but never linked to its owner (skills/overview); it is not in assumes/canonical_for
-    S4  line 9 [connector]: "connector" is used but never linked to its owner (connectors/overview); it is not in assumes/canonical_for
-    S4  line 9 [slash command]: "slash command" is used but never linked to its owner (plugins-reference#skills); it is not in assumes/canonical_for
-    S4  line 9 [sub-agent]: "sub-agent" is used but never linked to its owner (plugins-reference#agents); it is not in assumes/canonical_for
-    S4  line 9 [hook]: "hook" is used but never linked to its owner (plugins-reference#hooks); it is not in assumes/canonical_for
+    S4  line 9 [skill]: "skill" first appears here but this mention does not link to its owner (skills/overview); the first mention must carry the link (not in assumes/canonical_for)
+    S4  line 9 [connector]: "connector" first appears here but this mention does not link to its owner (connectors/overview); the first mention must carry the link (not in assumes/canonical_for)
+    S4  line 9 [slash command]: "slash command" first appears here but this mention does not link to its owner (plugins-reference#skills); the first mention must carry the link (not in assumes/canonical_for)
+    S4  line 9 [sub-agent]: "sub-agent" first appears here but this mention does not link to its owner (plugins-reference#agents); the first mention must carry the link (not in assumes/canonical_for)
+    S4  line 9 [hook]: "hook" first appears here but this mention does not link to its owner (plugins-reference#hooks); the first mention must carry the link (not in assumes/canonical_for)
 REVISE          fail_s5_unframed.md  (2 finding(s))
     S5  line 13 [https://code.claude.com/docs/en/plugins]: off-property handoff: no #anchor and not a registered task page; no ownership/summary framing nearby
     S5  line 15 [https://code.claude.com/docs/en/plugins-reference]: off-property handoff: no ownership/summary framing nearby
@@ -42,40 +17,46 @@ SHIP WITH NOTES fail_s6_doubled_prefix.md  (2 finding(s))
     S6  line 9: doubled '/docs/docs/' link prefix
     S6  line 11: doubled '/docs/docs/' link prefix
 SHIP            pass_overview.md
+SHIP            code_fence_examples.md
+REVISE          mixed_note_and_block.md  (2 finding(s))
+    S6  line 11: doubled '/docs/docs/' link prefix
+    S3  line 15 [chat-availability-settled]: possible contradiction (owner decision): Asserts plugin availability in Chat as settled fact, but the matrix records Chat availability as a LIVE contradiction between the support guidance and cowork/guide/plugins.
+        note to owner: Do not state Chat availability as settled until the product owner resolves the conflict. Describe it as unresolved and link the support matrix.
+REVISE          verdict_owner_decision.md  (1 finding(s))
+    S3  line 27 [chat-availability-settled]: possible contradiction (owner decision): Asserts plugin availability in Chat as settled fact, but the matrix records Chat availability as a LIVE contradiction between the support guidance and cowork/guide/plugins.
+        note to owner: Do not state Chat availability as settled until the product owner resolves the conflict. Describe it as unresolved and link the support matrix.
+REVISE          verdict_revise.md  (1 finding(s))
+    S5  line 27 [https://code.claude.com/docs/en/plugins]: off-property handoff: no #anchor and not a registered task page; no ownership/summary framing nearby
+SHIP            verdict_ship.md
+SHIP WITH NOTES verdict_ship_with_notes.md  (1 finding(s))
+    S6  line 31: doubled '/docs/docs/' link prefix
 
-2 of 4 file(s) block (Revise or Reject); Ship / Ship with Notes pass CI.
+6 of 11 file(s) block (Revise or Reject); Ship / Ship with Notes pass CI.
 BATCH VERDICT: REVISE - the batch is blocked; at least one page must be revised before merge.
 ```
 
-## Input-contract demo: the before/after META-doc
+## Real corpus (curated 5-page slice via fetch_corpus.py)
 ```
-REVISE          plugin_overview_before_after.md  (2 finding(s))
-    FM  line 1: no frontmatter parsed; the standard expects title/content-type/assumes/canonical_for. Exemptions are inactive, so any S4 concept findings below may be phantoms.
-    S4  line 5 [plugin]: "plugin" is used but never linked to its owner (plugins/overview); it is not in assumes/canonical_for
-
-1 of 1 file(s) block (Revise or Reject); Ship / Ship with Notes pass CI.
-BATCH VERDICT: REVISE - the batch is blocked; at least one page must be revised before merge.
-```
-
-## Real corpus (live pages via fetch_corpus.py)
-```
-REVISE          connectors_overview.md  (4 finding(s))
-    FM  line 1: no frontmatter parsed; the standard expects title/content-type/assumes/canonical_for. Exemptions are inactive, so any S4 concept findings below may be phantoms.
-    S4  line 5 [connector]: "connector" is used but never linked to its owner (connectors/overview); it is not in assumes/canonical_for
-    S4  line 58 [slash command]: "slash command" is used but never linked to its owner (plugins-reference#skills); it is not in assumes/canonical_for
-    S4  line 58 [sub-agent]: "sub-agent" is used but never linked to its owner (plugins-reference#agents); it is not in assumes/canonical_for
-REVISE          cowork_guide_plugins.md  (6 finding(s))
-    FM  line 1: no frontmatter parsed; the standard expects title/content-type/assumes/canonical_for. Exemptions are inactive, so any S4 concept findings below may be phantoms.
-    S4  line 7 [skill]: "skill" is used but never linked to its owner (skills/overview); it is not in assumes/canonical_for
-    S4  line 7 [connector]: "connector" is used but never linked to its owner (connectors/overview); it is not in assumes/canonical_for
-    S4  line 9 [slash command]: "slash command" is used but never linked to its owner (plugins-reference#skills); it is not in assumes/canonical_for
-    S4  line 9 [sub-agent]: "sub-agent" is used but never linked to its owner (plugins-reference#agents); it is not in assumes/canonical_for
-    S4  line 9 [hook]: "hook" is used but never linked to its owner (plugins-reference#hooks); it is not in assumes/canonical_for
+REVISE          connectors_overview.md  (6 finding(s))
+    FM  line 1: frontmatter contract: no frontmatter block found. Exemptions are inactive, so S4 findings here may be phantoms.
+    S4  line 5 [connector]: "connector" first appears here but this mention does not link to its owner (connectors/overview); the first mention must carry the link (not in assumes/canonical_for)
+    S4  line 19 [plugin]: "plugin" first appears here but this mention does not link to its owner (plugins/overview); the first mention must carry the link (not in assumes/canonical_for)
+    S4  line 19 [skill]: "skill" first appears here but this mention does not link to its owner (skills/overview); the first mention must carry the link (not in assumes/canonical_for)
+    S4  line 58 [slash command]: "slash command" first appears here but this mention does not link to its owner (plugins-reference#skills); the first mention must carry the link (not in assumes/canonical_for)
+    S4  line 58 [sub-agent]: "sub-agent" first appears here but this mention does not link to its owner (plugins-reference#agents); the first mention must carry the link (not in assumes/canonical_for)
+REVISE          cowork_guide_plugins.md  (7 finding(s))
+    FM  line 1: frontmatter contract: no frontmatter block found. Exemptions are inactive, so S4 findings here may be phantoms.
+    S4  line 5 [plugin]: "plugin" first appears here but this mention does not link to its owner (plugins/overview); the first mention must carry the link (not in assumes/canonical_for)
+    S4  line 7 [skill]: "skill" first appears here but this mention does not link to its owner (skills/overview); the first mention must carry the link (not in assumes/canonical_for)
+    S4  line 7 [connector]: "connector" first appears here but this mention does not link to its owner (connectors/overview); the first mention must carry the link (not in assumes/canonical_for)
+    S4  line 9 [slash command]: "slash command" first appears here but this mention does not link to its owner (plugins-reference#skills); the first mention must carry the link (not in assumes/canonical_for)
+    S4  line 9 [sub-agent]: "sub-agent" first appears here but this mention does not link to its owner (plugins-reference#agents); the first mention must carry the link (not in assumes/canonical_for)
+    S4  line 9 [hook]: "hook" first appears here but this mention does not link to its owner (plugins-reference#hooks); the first mention must carry the link (not in assumes/canonical_for)
 REVISE          docs_home.md  (30 finding(s))
-    FM  line 1: no frontmatter parsed; the standard expects title/content-type/assumes/canonical_for. Exemptions are inactive, so any S4 concept findings below may be phantoms.
-    S4  line 16 [connector]: "connector" is used but never linked to its owner (connectors/overview); it is not in assumes/canonical_for
+    FM  line 1: frontmatter contract: no frontmatter block found. Exemptions are inactive, so S4 findings here may be phantoms.
+    S4  line 16 [connector]: "connector" first appears here but this mention does not link to its owner (connectors/overview); the first mention must carry the link (not in assumes/canonical_for)
     S6  line 16: doubled '/docs/docs/' link prefix
-    S4  line 17 [skill]: "skill" is used but never linked to its owner (skills/overview); it is not in assumes/canonical_for
+    S4  line 17 [skill]: "skill" first appears here but this mention does not link to its owner (skills/overview); the first mention must carry the link (not in assumes/canonical_for)
     S6  line 17: doubled '/docs/docs/' link prefix
     S6  line 18: doubled '/docs/docs/' link prefix
     S6  line 19: doubled '/docs/docs/' link prefix
@@ -83,7 +64,7 @@ REVISE          docs_home.md  (30 finding(s))
     S6  line 21: doubled '/docs/docs/' link prefix
     S6  line 34: doubled '/docs/docs/' link prefix
     S6  line 49: doubled '/docs/docs/' link prefix
-    S4  line 66 [plugin]: "plugin" is used but never linked to its owner (plugins/overview); it is not in assumes/canonical_for
+    S4  line 66 [plugin]: "plugin" first appears here but this mention does not link to its owner (plugins/overview); the first mention must carry the link (not in assumes/canonical_for)
     S6  line 66: doubled '/docs/docs/' link prefix
     S6  line 75: doubled '/docs/docs/' link prefix
     S6  line 88: doubled '/docs/docs/' link prefix
@@ -102,26 +83,69 @@ REVISE          docs_home.md  (30 finding(s))
     S6  line 248: doubled '/docs/docs/' link prefix
     S6  line 294: doubled '/docs/docs/' link prefix
     S6  line 295: doubled '/docs/docs/' link prefix
-REVISE          plugins_overview.md  (6 finding(s))
-    FM  line 1: no frontmatter parsed; the standard expects title/content-type/assumes/canonical_for. Exemptions are inactive, so any S4 concept findings below may be phantoms.
-    S4  line 5 [plugin]: "plugin" is used but never linked to its owner (plugins/overview); it is not in assumes/canonical_for
-    S4  line 7 [slash command]: "slash command" is used but never linked to its owner (plugins-reference#skills); it is not in assumes/canonical_for
-    S4  line 7 [sub-agent]: "sub-agent" is used but never linked to its owner (plugins-reference#agents); it is not in assumes/canonical_for
+REVISE          plugins_overview.md  (8 finding(s))
+    FM  line 1: frontmatter contract: no frontmatter block found. Exemptions are inactive, so S4 findings here may be phantoms.
+    S4  line 5 [plugin]: "plugin" first appears here but this mention does not link to its owner (plugins/overview); the first mention must carry the link (not in assumes/canonical_for)
+    S4  line 7 [skill]: "skill" first appears here but this mention does not link to its owner (skills/overview); the first mention must carry the link (not in assumes/canonical_for)
+    S4  line 7 [connector]: "connector" first appears here but this mention does not link to its owner (connectors/overview); the first mention must carry the link (not in assumes/canonical_for)
+    S4  line 7 [slash command]: "slash command" first appears here but this mention does not link to its owner (plugins-reference#skills); the first mention must carry the link (not in assumes/canonical_for)
+    S4  line 7 [sub-agent]: "sub-agent" first appears here but this mention does not link to its owner (plugins-reference#agents); the first mention must carry the link (not in assumes/canonical_for)
     S5  line 39 [https://code.claude.com/docs/en/plugins]: off-property handoff: no #anchor and not a registered task page; no ownership/summary framing nearby
     S5  line 47 [https://support.claude.com/en/articles/13345190-getting-started-with-cowork]: off-property handoff: no #anchor and not a registered task page; no ownership/summary framing nearby
 REVISE          plugins_submit.md  (11 finding(s))
-    FM  line 1: no frontmatter parsed; the standard expects title/content-type/assumes/canonical_for. Exemptions are inactive, so any S4 concept findings below may be phantoms.
-    S4  line 5 [plugin]: "plugin" is used but never linked to its owner (plugins/overview); it is not in assumes/canonical_for
-    S4  line 9 [connector]: "connector" is used but never linked to its owner (connectors/overview); it is not in assumes/canonical_for
+    FM  line 1: frontmatter contract: no frontmatter block found. Exemptions are inactive, so S4 findings here may be phantoms.
+    S4  line 5 [plugin]: "plugin" first appears here but this mention does not link to its owner (plugins/overview); the first mention must carry the link (not in assumes/canonical_for)
+    S4  line 9 [connector]: "connector" first appears here but this mention does not link to its owner (connectors/overview); the first mention must carry the link (not in assumes/canonical_for)
     S5  line 16 [https://code.claude.com/docs/en/plugin-marketplaces]: off-property handoff: no #anchor and not a registered task page
     S5  line 16 [https://code.claude.com/docs/en/plugin-marketplaces]: off-property handoff: no #anchor and not a registered task page
-    S4  line 31 [skill]: "skill" is used but never linked to its owner (skills/overview); it is not in assumes/canonical_for
-    S4  line 31 [slash command]: "slash command" is used but never linked to its owner (plugins-reference#skills); it is not in assumes/canonical_for
-    S4  line 31 [sub-agent]: "sub-agent" is used but never linked to its owner (plugins-reference#agents); it is not in assumes/canonical_for
+    S4  line 31 [skill]: "skill" first appears here but this mention does not link to its owner (skills/overview); the first mention must carry the link (not in assumes/canonical_for)
+    S4  line 31 [slash command]: "slash command" first appears here but this mention does not link to its owner (plugins-reference#skills); the first mention must carry the link (not in assumes/canonical_for)
+    S4  line 31 [sub-agent]: "sub-agent" first appears here but this mention does not link to its owner (plugins-reference#agents); the first mention must carry the link (not in assumes/canonical_for)
     S5  line 54 [https://support.claude.com/en/articles/13145338-anthropic-software-directory-terms]: off-property handoff: no #anchor and not a registered task page; no ownership/summary framing nearby
     S5  line 55 [https://support.claude.com/en/articles/13145358-anthropic-software-directory-policy]: off-property handoff: no #anchor and not a registered task page; no ownership/summary framing nearby
     S5  line 91 [https://code.claude.com/docs/en/plugins]: off-property handoff: no #anchor and not a registered task page
 
 5 of 5 file(s) block (Revise or Reject); Ship / Ship with Notes pass CI.
 BATCH VERDICT: REVISE - the batch is blocked; at least one page must be revised before merge.
+```
+
+## Input-contract demo: before/after meta-doc (FM announces missing frontmatter)
+```
+REVISE          plugin_overview_before_after.md  (7 finding(s))
+    FM  line 1: frontmatter contract: no frontmatter block found. Exemptions are inactive, so S4 findings here may be phantoms.
+    S4  line 5 [plugin]: "plugin" first appears here but this mention does not link to its owner (plugins/overview); the first mention must carry the link (not in assumes/canonical_for)
+    S4  line 11 [skill]: "skill" first appears here but this mention does not link to its owner (skills/overview); the first mention must carry the link (not in assumes/canonical_for)
+    S4  line 11 [connector]: "connector" first appears here but this mention does not link to its owner (connectors/overview); the first mention must carry the link (not in assumes/canonical_for)
+    S4  line 11 [slash command]: "slash command" first appears here but this mention does not link to its owner (plugins-reference#skills); the first mention must carry the link (not in assumes/canonical_for)
+    S4  line 11 [sub-agent]: "sub-agent" first appears here but this mention does not link to its owner (plugins-reference#agents); the first mention must carry the link (not in assumes/canonical_for)
+    S4  line 82 [hook]: "hook" first appears here but this mention does not link to its owner (plugins-reference#hooks); the first mention must carry the link (not in assumes/canonical_for)
+
+1 of 1 file(s) block (Revise or Reject); Ship / Ship with Notes pass CI.
+BATCH VERDICT: REVISE - the batch is blocked; at least one page must be revised before merge.
+```
+
+## JSON output (batch + per-page): python conformance_gate.py --json fixtures/verdicts/verdict_owner_decision.md
+```
+{
+  "batch": {
+    "verdict": "Revise",
+    "severity": "revise",
+    "clause": "the batch is blocked; at least one page must be revised before merge."
+  },
+  "pages": {
+    "fixtures\\verdicts\\verdict_owner_decision.md": {
+      "verdict": "Revise",
+      "severity": "revise",
+      "findings": [
+        {
+          "rule": "S3",
+          "line": 27,
+          "subject": "chat-availability-settled",
+          "detail": "possible contradiction (owner decision): Asserts plugin availability in Chat as settled fact, but the matrix records Chat availability as a LIVE contradiction between the support guidance and cowork/guide/plugins.",
+          "note": "Do not state Chat availability as settled until the product owner resolves the conflict. Describe it as unresolved and link the support matrix."
+        }
+      ]
+    }
+  }
+}
 ```

@@ -14,7 +14,7 @@ The components a plugin can use depend on where it runs. This page is the starti
 
 Plugins let you define how Claude should approach recurring work, which tools and data it can use, and which workflows people can invoke directly. Because plugin components are file-based, teams can review, test, version, and share the same operating context.
 
-A sales plugin, for example, could connect Claude to a CRM and knowledge base, teach it the team's sales process, expose a command for prospect research, and delegate competitive analysis to a sub-agent. The connector supplies access, the skill supplies judgment and process, the command gives the user a reliable entry point, and the sub-agent handles a bounded parallel task.
+A sales plugin, for example, could connect Claude to a CRM and knowledge base, teach it the team's sales process, expose a prospect-research workflow, and hand off a competitive analysis to run in parallel — one package a team installs once and reuses, instead of each person wiring up the same setup by hand.
 
 ## How plugins compose capabilities
 

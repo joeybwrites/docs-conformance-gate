@@ -14,9 +14,13 @@ Implements a deterministic subset of the plugin documentation standard
                                 a #anchor or target a registered dedicated
                                 task page.
   S6  link form (bonus)       - no doubled '/docs/docs/' prefixes.
+  S3  possible contradiction  - regex-detected contradiction CANDIDATE; NOT an
+                                automatic Reject (owner decision by default).
+  FM  frontmatter contract    - required fields present and well-typed.
 
-Runs on Markdown files or directories. Exit code = number of files with
-findings (0 == clean), so it drops straight into CI.
+Findings roll up into a non-compensating verdict (Ship / Ship with Notes /
+Revise / Reject). Exit code = number of BLOCKING files (Revise or Reject);
+Ship and Ship with Notes exit 0, so it drops straight into CI.
 
     python conformance_gate.py fixtures/ corpus/
     python conformance_gate.py --json corpus/plugins_overview.md
@@ -96,45 +100,60 @@ def check_page(path: Path, reg: dict) -> list[dict]:
     lines = mask_code(text.splitlines())  # ignore fenced example code in all rules
     body = lines[body_off:]
 
-    assumes = {a.lower() for a in (meta.get("assumes") or [])}
-    canonical = {c.lower() for c in (meta.get("canonical_for") or [])}
     findings: list[dict] = []
 
-    # Input contract: the gate expects one actual doc page with top-level
-    # frontmatter. A file with none (a pre-standard page, or a meta-doc such as
-    # a before/after) has no `assumes`/`canonical_for` to honor, so its S4
-    # results may be phantoms. Announce that rather than silently over-flagging.
+    # ---- FM: frontmatter contract ----
+    # The standard requires title/content-type/assumes/canonical_for, with
+    # assumes/canonical_for as arrays. Partial or malformed frontmatter yields a
+    # clear FM finding and disables exemptions, so a scalar `assumes: plugin`
+    # can't silence S4 (nor get iterated character by character).
+    fm_problems = []
     if not meta:
+        fm_problems.append("no frontmatter block found")
+    else:
+        for field in ("title", "content-type", "assumes", "canonical_for"):
+            if field not in meta:
+                fm_problems.append(f"missing `{field}`")
+        for field in ("assumes", "canonical_for"):
+            if field in meta and not isinstance(meta[field], list):
+                fm_problems.append(f"`{field}` must be an array")
+    if fm_problems:
         findings.append({
             "rule": "FM", "line": 1, "subject": "",
-            "detail": "no frontmatter parsed; the standard expects "
-                      "title/content-type/assumes/canonical_for. Exemptions are "
-                      "inactive, so any S4 concept findings below may be phantoms.",
+            "detail": "frontmatter contract: " + "; ".join(fm_problems)
+                      + ". Exemptions are inactive, so S4 findings here may be phantoms.",
         })
-
-    all_targets = [url for ln in body for _t, url in
-                   ((m.group(1), m.group(2)) for m in LINK_RE.finditer(ln))]
+    assumes = ({a.lower() for a in meta["assumes"]}
+               if isinstance(meta.get("assumes"), list) else set())
+    canonical = ({c.lower() for c in meta["canonical_for"]}
+                 if isinstance(meta.get("canonical_for"), list) else set())
 
     # ---- S4: prerequisite bridging ----
+    # The FIRST reader-visible mention of a concept must itself be a link to the
+    # concept's owner (unless declared in assumes/canonical_for). A later link
+    # does not cure an unlinked first mention.
     for cid, spec in reg["concepts"].items():
         if cid.lower() in assumes or cid.lower() in canonical:
             continue
         alias_pat = re.compile(
             r"\b(" + "|".join(re.escape(a) for a in
-                               sorted(spec["aliases"], key=len, reverse=True)) + r")\b",
+                              sorted(spec["aliases"], key=len, reverse=True)) + r")\b",
             re.IGNORECASE)
-        first_line = None
-        for idx, ln in enumerate(body):
-            if alias_pat.search(visible_text(ln)):
-                first_line = body_off + idx + 1
-                break
-        if first_line is None:
+        first_idx = next((i for i, ln in enumerate(body)
+                          if alias_pat.search(visible_text(ln))), None)
+        if first_idx is None:
             continue  # concept not used here
-        if not any(spec["owner_match"] in url for url in all_targets):
+        linked_at_first = any(
+            spec["owner_match"] in url and alias_pat.search(txt)
+            for txt, url in ((m.group(1), m.group(2))
+                             for m in LINK_RE.finditer(body[first_idx]))
+        )
+        if not linked_at_first:
             findings.append({
-                "rule": "S4", "line": first_line, "subject": cid,
-                "detail": f'"{cid}" is used but never linked to its owner '
-                          f'({spec["owner_match"]}); it is not in assumes/canonical_for',
+                "rule": "S4", "line": body_off + first_idx + 1, "subject": cid,
+                "detail": f'"{cid}" first appears here but this mention does not link '
+                          f'to its owner ({spec["owner_match"]}); the first mention must '
+                          f'carry the link (not in assumes/canonical_for)',
             })
 
     # ---- S5: contextualized cross-property handoff ----
@@ -183,20 +202,27 @@ def check_page(path: Path, reg: dict) -> list[dict]:
                 "detail": "doubled '/docs/docs/' link prefix",
             })
 
-    # ---- S3: contradiction of the evidenced state (Block) ----
-    # Curated + configurable: registry `contradiction_patterns` are claims known
-    # to contradict the matrix's evidenced state. Deterministic (regex), and a
-    # LEVER the docs/product team edits as truths shift or conflicts are found.
-    # (The fuller design compares structured claims to the matrix directly.)
+    # ---- S3: possible contradiction of the evidenced state ----
+    # Regex-detected contradiction CANDIDATES. Deliberately NOT an automatic
+    # Reject (severity is a registry lever, default "revise" = owner decision):
+    # a negation guard is the only polarity handling, and the gate cannot tell a
+    # stale claim from the newer correct one. A match flags the passage for a
+    # human owner. (The fuller design compares structured claims to the matrix.)
     body_text = "\n".join(body)
+    neg_re = re.compile(r"\b(not|never|no longer|cannot|can't|isn't|aren't|"
+                        r"don't|doesn't|won't|do not|does not)\b", re.IGNORECASE)
     for cp in reg.get("contradiction_patterns", []):
-        m = re.search(cp["pattern"], body_text, re.IGNORECASE)
-        if m:
+        for m in re.finditer(cp["pattern"], body_text, re.IGNORECASE):
+            pre = body_text[max(0, m.start() - 40):m.start()]
+            if neg_re.search(pre) or neg_re.search(m.group(0)):
+                continue  # negated / cautionary phrasing is not a positive claim
             line = body_off + body_text[:m.start()].count("\n") + 1
             findings.append({
                 "rule": "S3", "line": line, "subject": cp["id"],
-                "detail": cp["reason"], "note": cp.get("note", ""),
+                "detail": "possible contradiction (owner decision): " + cp["reason"],
+                "note": cp.get("note", ""),
             })
+            break  # one finding per pattern
     return findings
 
 
@@ -208,7 +234,7 @@ def collect(paths):
     for p in paths:
         pp = Path(p)
         if pp.is_dir():
-            files.extend(sorted(f for f in pp.glob("*.md")
+            files.extend(sorted(f for f in pp.rglob("*.md")
                                 if f.name.lower() not in _SKIP_NAMES))
         else:
             files.append(pp)  # explicit path is honored as-is

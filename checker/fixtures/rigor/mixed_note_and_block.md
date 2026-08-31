@@ -15,5 +15,7 @@ See also [more connectors](/docs/docs/connectors/overview).
 Plugins are fully available in web Chat, Desktop Chat, and Cowork.
 
 <!-- Non-compensating test: this page carries a NOTE-level finding (S6 doubled
-     prefix) AND a BLOCK-level finding (S3 Chat contradiction). The verdict must
-     be REJECT — the worst finding wins; the clean S6-only reading never applies. -->
+     prefix) AND a higher-severity S3 owner-decision finding. The verdict is
+     REVISE - the worst finding wins; the clean S6-only (Ship with Notes)
+     reading never applies. (S3 is owner-decision/Revise by default, not an
+     auto-Reject; set severities.S3=block to make it Reject.) -->
