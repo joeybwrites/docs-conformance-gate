@@ -1,7 +1,5 @@
 # Part 1: Audit memo for Plugins
 
-Status: Analysis settled; the prose is an AI-assisted draft for Joey's voice pass.
-
 ## Slice, and why Plugins
 
 The take-home suggested **Skills**, **Plugins**, and **Connectors** as cross-cutting primitives. I looked at all three, plus Cowork, Claude Tag, Claude for M365, and the Claude Code plugin documentation, and chose **Plugins**.

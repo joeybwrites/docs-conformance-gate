@@ -1,6 +1,6 @@
 # Bounded Cowork and Claude Code plugin component matrix
 
-Status: Content settled and evidence-bounded; a draft for Joey's review. This is the artifact whose absence lets “what a plugin contains” drift across the estate. Plugin pages should reference it under S1/S2 instead of restating another flat list.
+Status: Content settled and evidence-bounded. This is the artifact whose absence lets “what a plugin contains” drift across the estate. Plugin pages should reference it under S1/S2 instead of restating another flat list.
 
 **Scope — bounded, not all-surface.** This matrix covers exactly two surfaces, **Cowork** and **Claude Code**. It is deliberately not an all-surface matrix. Other surfaces (Claude Tag, Claude for Government, Claude Desktop on 3P, Claude for M365) are sketched under "Further surfaces" below and each requires a **separately confirmed row** — with its own cited sources — before it may be folded into the table. Do not read a surface's absence from the table as an evidenced state.
 

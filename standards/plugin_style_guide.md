@@ -1,6 +1,6 @@
 # Plugin documentation standard (style-guide excerpt + content-type templates)
 
-Status: Rules settled; the prose is an AI-assisted draft for Joey's voice pass. The plugin documentation isn't broadly missing information. It's largely complete across the estate but distributed across page hierarchies and properties, so readers have to reconstruct the lifecycle themselves. This standard establishes **clear page ownership, contextualized handoffs, and decision-critical summaries** without duplicating the Claude Code tutorial or reference. Each rule is written so a reviewer, or a machine in Part 3, can apply it the same way twice. Companion: `plugin_component_matrix.md`.
+The plugin documentation isn't broadly missing information. It's largely complete across the estate but distributed across page hierarchies and properties, so readers have to reconstruct the lifecycle themselves. This standard establishes **clear page ownership, contextualized handoffs, and decision-critical summaries** without duplicating the Claude Code tutorial or reference. Each rule is written so a reviewer, or a machine in Part 3, can apply it the same way twice. Companion: `plugin_component_matrix.md`.
 
 ## Page ownership model (the spine)
 

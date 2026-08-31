@@ -2,7 +2,7 @@
 
 A take-home response for the Technical Documentation & Content Engineer (Claude Docs) role: an audit of the Claude Docs **Plugins** slice, a documentation standard that would prevent the problems found, a working conformance checker that enforces a machine-checkable subset of it on the real docs, and an adoption plan.
 
-> Provenance: the analysis, the standard, and the checker are settled. The outward-facing prose — the audit memo, the before/after rewrite, and Part 4 — is an AI-assisted draft awaiting my voice pass. [`work_log.md`](work_log.md) is the full workflow and AI-use disclosure.
+> Provenance: the analysis, the standard, and the checker are settled. [`work_log.md`](work_log.md) is the full workflow and AI-use disclosure.
 
 ## The four parts
 
