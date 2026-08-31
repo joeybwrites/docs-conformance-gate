@@ -31,7 +31,9 @@ Findings roll up into one **non-compensating** verdict per page — the page's t
 | **Revise** | any `revise`-severity finding (S4, S5, FM) | block |
 | **Reject** | any `block`-severity finding (S3 contradiction) | block |
 
-**These are levers, not hard-coded policy.** The rule→severity map, the tier names, and the S3 `contradiction_patterns` all live in `registry.json` — retune severities, rename tiers, or add contradictions without touching `conformance_gate.py`. Worked examples of each tier, with the note the gate returns to the owning team, are in `fixtures/verdicts/` (see its `NOTES.md`).
+**These are levers, not hard-coded policy.** The rule→severity map, the tier names, the S3 `contradiction_patterns`, and the batch clauses all live in `registry.json` — retune severities, rename tiers, or add contradictions without touching `conformance_gate.py`. Worked examples of each tier, with the note the gate returns to the owning team, are in `fixtures/verdicts/` (see its `NOTES.md`).
+
+**Batch verdict.** Point the gate at many pages (a PR's changeset) and it emits one **batch disposition**, non-compensating across the set — a single Reject holds the whole batch until it's resolved, a Revise blocks the merge, Ship with Notes passes with a follow-up, Ship passes clean. The per-tier policy text is `batch_clauses` in `registry.json`.
 
 ## Run it
 
@@ -65,6 +67,7 @@ Running against the **real** `plugin_overview_before_after.md` (not just a hand-
 - **Fixed — framing heuristic false positive.** A registered destination with a short bulleted label (`**Install in Claude Code:** [Discover and install plugins]`) was flagged "unframed" by a crude 6-word threshold. Now: a registered destination is framed by a descriptive (≥2-word) label; the word-count/cue test only applies to arbitrary off-property links.
 - **Fixed — `plugins-reference` root links.** The reference is consulted whole, so it's now a **registered dedicated destination** (root links to it are valid handoffs). Decision recorded by the author.
 - **Fixed — silent phantom S4s.** Meta-docs and pre-standard pages now get an explicit **FM** finding instead of confusing concept flags (see Input contract).
+- **Fixed — fenced/inline-code blindness.** The gate blanks ` ```fenced``` ` blocks and `` `inline code` `` before scanning, so documentation *examples* aren't flagged as live claims (confirmed by `fixtures/rigor/code_fence_examples.md`, which is all-example and verdicts as Ship).
 - **Known residue (honest).** Legal/policy links (`directory-terms`, `directory-policy`) are still flagged as unframed — a registry-tuning call. Findings aren't de-duplicated (same URL twice on a line reports twice). Concept matching is word-boundary and excludes the hyphenated `plug-in`, so "Enterprise SSO plug-in" is correctly *not* matched, but generic senses of "skill"/"agent" could still collide — mitigated by multi-word aliases and the bridge exemption (a link to a concept's owner is treated as S4 bridging, not an S5 handoff).
 
 ## Evaluating the checker itself
@@ -81,5 +84,7 @@ Running against the **real** `plugin_overview_before_after.md` (not just a hand-
 - `registry.json` — declared inputs (concept→owner, hosts, dedicated destinations, cues)
 - `fetch_corpus.py` — pulls the real corpus
 - `fixtures/` — `pass_overview.md` (clean) + `fail_s4/s5/s6` (each fires one rule)
+- `fixtures/verdicts/` — one variant per verdict tier + `NOTES.md` (the note to the owning team)
+- `fixtures/rigor/` — non-compensating (note + block = Reject) and code-fence (examples ignored) cases
 - `corpus/` — the fetched live pages (gitignored; reproducible via `fetch_corpus.py`)
 - `sample_output.txt` — captured run (fixtures, the meta-doc input-contract demo, and the real corpus)

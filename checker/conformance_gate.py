@@ -61,8 +61,28 @@ def parse_frontmatter(text: str):
 
 
 def visible_text(line: str) -> str:
-    """Replace [text](url) with text, so concept detection ignores URLs."""
+    """Reduce a line to reader-visible prose: drop inline `code` spans and turn
+    [text](url) into text, so concept detection ignores URLs and code."""
+    line = re.sub(r"`[^`]*`", " ", line)
     return LINK_RE.sub(lambda m: m.group(1), line)
+
+
+def mask_code(lines):
+    """Blank fenced code blocks (``` / ~~~), preserving line count, so rules
+    never match documentation examples. Line numbers stay correct."""
+    out, fence = [], None
+    for ln in lines:
+        s = ln.lstrip()
+        if fence is None and (s.startswith("```") or s.startswith("~~~")):
+            fence = s[:3]
+            out.append("")
+        elif fence is not None:
+            out.append("")
+            if s.startswith(fence):
+                fence = None
+        else:
+            out.append(ln)
+    return out
 
 
 def host_of(url: str):
@@ -73,7 +93,7 @@ def host_of(url: str):
 def check_page(path: Path, reg: dict) -> list[dict]:
     text = path.read_text(encoding="utf-8")
     meta, body_off = parse_frontmatter(text)
-    lines = text.splitlines()
+    lines = mask_code(text.splitlines())  # ignore fenced example code in all rules
     body = lines[body_off:]
 
     assumes = {a.lower() for a in (meta.get("assumes") or [])}
@@ -222,9 +242,22 @@ def main():
     # Non-blocking tiers (Ship / Ship with Notes) pass CI; Revise / Reject block.
     blocking = sum(1 for _v, sev in verdicts.values() if sev in ("revise", "block"))
 
+    # Batch verdict: non-compensating across the whole set — the worst page sets
+    # the batch's disposition, so a single Reject holds the whole changeset.
+    order = reg["severity_order"]
+    batch_sev = "clean"
+    for _v, sev in verdicts.values():
+        if order.index(sev) > order.index(batch_sev):
+            batch_sev = sev
+    batch_verdict = reg["verdicts"][batch_sev]
+    batch_clause = reg.get("batch_clauses", {}).get(batch_sev, "")
+
     if args.json:
-        out = {f: {"verdict": verdicts[f][0], "severity": verdicts[f][1], "findings": finds}
-               for f, finds in results.items()}
+        out = {
+            "batch": {"verdict": batch_verdict, "severity": batch_sev, "clause": batch_clause},
+            "pages": {f: {"verdict": verdicts[f][0], "severity": verdicts[f][1], "findings": finds}
+                      for f, finds in results.items()},
+        }
         print(json.dumps(out, indent=2))
     else:
         for f, finds in results.items():
@@ -239,6 +272,7 @@ def main():
                     print(f'        note to owner: {fd["note"]}')
         print(f"\n{blocking} of {len(results)} file(s) block (Revise or Reject); "
               f"Ship / Ship with Notes pass CI.")
+        print(f"BATCH VERDICT: {batch_verdict.upper()} - {batch_clause}")
 
     sys.exit(min(blocking, 100))
 

@@ -20,6 +20,12 @@
   "severities": {"S3": "block", "S2": "revise", "S4": "revise", "S5": "revise", "FM": "revise", "S6": "note"},
   "severity_order": ["clean", "note", "revise", "block"],
   "verdicts": {"clean": "Ship", "note": "Ship with Notes", "revise": "Revise", "block": "Reject"},
+  "batch_clauses": {
+    "clean": "the batch passes the gate.",
+    "note": "the batch passes with notes; address them in a follow-up.",
+    "revise": "the batch is blocked; at least one page must be revised before merge.",
+    "block": "the batch is blocked; a page contradicts the estate and must be resolved before any page in the set ships."
+  },
 
   "contradiction_patterns": [
     {
