@@ -1,51 +1,41 @@
-# Conformance Gate — Design (Part 3 + Part 1 measurement)
+# Part 3 — Conformance gate: design, prototype scope, evaluation
 
-Status: DESIGN, forming. Not locked.
+The rules live in `../standards/plugin_style_guide.md` (S1–S8). This doc does not redefine them (single owner); it specifies **which are prototyped, how the prototype runs on the real corpus, how the checker is evaluated, and the fuller gate as designed-not-built.** The prompt invites "notes about what you'd build out" when the plan outruns the time — the classifier vision below is exactly that.
 
-Enforces the Part 2 standard for the Plugins slice as deterministic, machine-checkable rules with non-compensating (blind-reviewer-style) verdicts. Prototype scope: 1–2 rule families end-to-end on the real corpus; the rest designed + stubbed.
+## What ships in Part 3
 
-## Rule families
+- **One working vertical slice** that RUNS on the real corpus and shows what it found (with real false positives). Two-deep-beats-four-thin: depth on one check, not a shallow four.
+- This design doc, marking the fuller gate as designed, not built.
 
-### R-A. Surface-scoped component conformance (fixes the drift)
-- Input: a registry declaring, per surface (Cowork / Claude Code), the plugin component set.
-- Check: any page enumerating plugin components must match the surface-scoped set for the surface it addresses; naming a Code-only component (LSP, monitors, themes, bin) without scoping it to Claude Code = violation.
-- Verdict: divergent set = Revise; availability contradiction ("coming soon" vs "shipped") = Block.
+## The prototype — the connective-tissue check (S4 + S5)
 
-### R-B. Prerequisite bridging — Joey's "what we expect users to know per page" (STAR of the measurement story)
-Turns JF1 "assumes prerequisite knowledge" (un-checkable as quality) into a deterministic rule.
-- Inputs:
-  - **Concept registry**: core concepts (plugin, skill, connector, MCP, slash command, sub-agent, hook, marketplace, manifest, scope, …) each with a canonical definition page + aliases.
-  - **Per-page assumed-knowledge budget**: page frontmatter `assumes: [concept, …]` — what the reader may already know.
-- Check: for each registry concept a page mentions that is NOT in `assumes`, the page must link to that concept's canonical page on first mention (minimum bar) or define it inline. Neither → violation `unbridged prerequisite: <concept> @ line N`.
-- Output: line-level, e.g. `submit.md:42 mentions "MCP connector" — not in assumes, no canonical link`.
+Chosen because it is the most deterministic slice AND it measures the fragmentation headline directly, and it has a ready known-positive: the reference sweep found **10 of 17 cross-reference pages name plugins without linking the plugin docs.**
 
-### R-C. Link canonicalization
-Flag non-canonical internal-link FORMS (doubled `/docs/docs/`, alias paths absent from llms.txt). Status-only checkers PASS these (they resolve) — so flag by form, not HTTP code.
+- **S4 — prerequisite bridging.** Inputs: a **concept registry** (core concepts → owning page + aliases) and each page's `assumes:` frontmatter. Check: for every registry concept a page mentions that is not in its `assumes`, require a first-mention link to the owner. Output: line-level violations (`page:line — concept "X" used, not assumed, not linked`).
+- **S5 — handoff presence (deterministic core).** For off-property links (`code.claude.com`, `support.claude.com`) in a decision context: require an adjacent summary + ownership sentence, and a `#anchor` **unless** the target is a registered dedicated task page (per the ownership registry). Flag bare-root / unframed handoffs.
 
-### R-D. Off-property core-concept offloading
-Flag in-scope plugin pages whose ONLY path to a core concept is an outbound link to an out-of-scope property (code.claude.com / support.claude.com). Operationalizes the "pull forward" finding.
+Corpus: pulled from `claude.com/docs/llms.txt`, in-scope surfaces. Runs headless; emits a report keyed by page/line/rule. `assumes:`, `content-type:`, and the registry are the declared inputs (maintained with the pages), so the check can't rot silently.
 
-### R-E. Terminology + decaying-time language
-Canonical terms (sub-agent). Flag relative-time promises ("coming soon", "in the weeks ahead") in availability sections.
+**Known-positives (must fire — R3-style):** the 10 unlinked cross-reference pages; the doubled-`/docs/docs/` home-page links (S6, a cheap bonus); optionally the Chat availability contradiction (S3).
 
-## Measurement (Part 1 bullet 4)
+## Evaluating the checker (Part 3 asks for this explicitly)
 
-### Estate-health metrics (from the gate — leading indicator, runs in CI)
-Unbridged-prerequisite violations per page / total · surface-unscoped component claims · % plugin pages passing all rules · off-property core-concept offloads.
+- **False positives.** Gold case from the sweep: **"Enterprise SSO plug-in"** (Microsoft's hyphenated term on entra-broker / connectors-m365) is NOT a Claude plugin — the matcher must separate "plugin" from "plug-in" and generic uses. Plus generic-word collisions ("skill"/"agent" as common nouns). Levers: prefer multi-word canonical terms, first-mention-only, and the `assumes:`/registry inputs. **Tolerance:** tuned toward recall — a missed bridge confuses a reader; a false flag costs a writer ~10s to dismiss — but capped so the report stays credible. State the number and the reason.
+- **Degradation.** Violation count tracked in CI; a PR that adds unbridged concepts raises it and can block merge. Registry-coverage meta-check: concepts frequent across the estate but absent from the registry = the registry going stale.
+- **Anti-staleness ("what keeps this from being a stale artifact in six months?").** Runs in CI on every docs PR; the registry and the `assumes:`/`content-type:` frontmatter live with the pages; a failing gate blocks merge. It fails loudly on every change rather than rotting quietly.
 
-### User-journey audit (Joey's "prospective audit of the user journey")
-Define canonical reader tasks + the minimal in-estate page path each requires:
-- "Cold reader: what is a plugin + what can it contain" → overview
-- "Cowork user: install a plugin" → overview → cowork/guide/plugins → marketplace
-- "Developer: prepare a plugin for submission" → overview → submit
+## The fuller gate — a page classifier (DESIGNED, not built)
 
-Deterministic journey check: following ONLY in-estate links, can a reader traverse the path with (a) every concept bridged [R-B] and (b) no forced off-property hop for a core step [R-D]? A break = journey failure, located at the page.
-**Keep it structural (bridging + reachability), NOT an LLM "is this smooth" grade** — that's the un-checkable trap.
+A per-page classifier whose **role assignment selects which checks fire** — an extension of S7's `content-type`, **not a parallel checker** (one home per rule, R1). Four dimensions (Joey's framing, audited):
 
-### Real instrumentation (the "how you'd instrument it" — telemetry, ground-truth/lagging)
-Off-property exit rate on plugin pages · internal-search zero-result rate for plugin queries · "was this helpful" votes · support tickets tagged plugins · (if available) task-completion funnels for the journeys above. **The gate predicts; telemetry confirms.** Track both over time.
+1. **Expected incoming knowledge** ("semi-knowledge-graph") = S4 + `assumes:`. **Tractable form is the per-page `assumes:` list, not a hand-maintained cross-page knowledge graph** — a KG of concept prerequisites is the expensive, rot-prone part (the exact anti-staleness failure this gate exists to prevent). Keep the KG as the mental model; build `assumes:`.
+2. **Required supporting-material references, interlinked** = S4 + S5. (Re-expression of existing rules, deliberately not a separate check.)
+3. **Bounded config-in-miniature** = S5 + a **duplication ceiling** *(a genuine addition to S5)*: a config summary must (a) stay under a length cap, (b) link to its owner, (c) not verbatim-overlap the owner's canonical block. "Useful" past that proxy is a human call — automating it would make this a quality-grader, which the whole design avoids.
+4. **Terminality / journey-completeness** *(a genuine addition)* — **a team-sourced, DECLARED input, per intended reader-goal**, gathered via standard tech-writing discovery (interview the feature team on expected usage). The checker enforces **conformance-to-declaration**: "declared terminal for goal X → does the page satisfy X in-page, or does it dangle?" It is **not** machine-inferred, and it is **not** a flat page label (a page is terminal for one goal and a hub for another — e.g. the overview is terminal for "what is a plugin?" and a hub for "how do I build one?").
+   - **This is the one dimension a take-home structurally cannot prototype:** its ground truth lives with teams the candidate has no access to in a 6-hour exercise. That makes it a **Part 4 capability** (adoption / inter-team work without authority) — and the honest reason it is designed here, not built.
 
-## Evaluating the checker itself (Part 3 requirement)
-- **False positives**: main source = generic-word collisions (R-B: "skill"/"agent" as common nouns) + undeclared-but-legit assumptions. Levers: prefer multi-word canonical terms, first-mention only, the `assumes` frontmatter. Tune toward RECALL (a missed bridge confuses a reader; a false flag costs a writer ~10s to dismiss) but cap FP so the report stays credible — state the target + the reason.
-- **Degradation detection**: violation count tracked in CI; a PR that adds unbridged concepts raises it and can block merge. Registry-coverage meta-check: concepts frequent across the estate but absent from the registry = registry going stale.
-- **Anti-staleness ("stale artifact in 6 months?")**: gate runs in CI on every docs PR; registry versioned WITH the docs; `assumes` lives in page frontmatter (maintained with the page); failing gate blocks merge. It can't rot silently because it runs on every change and fails loudly.
+**Validation.** The classifier's labels need a **reader-task set** (journey paths) as ground truth, or they are unfalsifiable assertions — the same discipline any checker needs (a confident-wrong classifier is worse than none).
+
+## Measurement it feeds (Part 1 §4)
+
+Gate metrics are the **leading** indicator (unbridged-prerequisite count, unframed-handoff count, % pages clean — in CI). The **structural journey audit** (can a reader traverse discovery→build→…→maintain in-estate with every concept bridged and no unframed off-property hop?) is the coherence measure. **Telemetry** is ground truth (off-property exit rate on plugin pages, internal-search zero-result rate, "was this helpful", plugin-tagged tickets). The gate predicts; telemetry confirms.

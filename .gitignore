@@ -216,3 +216,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# fetched live docs (reproducible via checker/fetch_corpus.py)
+checker/corpus/

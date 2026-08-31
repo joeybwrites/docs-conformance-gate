@@ -1,87 +1,126 @@
-# Part 1 — Audit Memo: Plugins
+# Part 1: Audit memo for Plugins
+
+Status: Final.
 
 ## Slice, and why Plugins
 
-The take home suggested **Skills** / **Plugins** / **Connectors** as the cross-cutting primitives. I looked at all three plus **Cowork**, **Claude Tag**, and **Claude for M365**, and chose **Plugins**.
+The take-home suggested **Skills**, **Plugins**, and **Connectors** as cross-cutting primitives. I looked at all three, plus Cowork, Claude Tag, Claude for M365, and the Claude Code plugin documentation, and chose **Plugins**.
 
-Plugins is the *compositional* primitive: a plugin is a container for the others — skills, connectors, slash commands, sub-agents, and more. Its documentation therefore has to reconcile every other primitive's vocabulary in one place, which makes it the surface where the estate's standardization gaps concentrate and compound. Connectors, by contrast, is the healthiest primitive (complete lifecycle coverage, deep left-nav), and Claude Tag is the best-structured product section overall. I use both as positive controls for the target state — not as the problem.
+Plugins are the compositional primitive: they package skills, connectors, commands, agents, hooks, and other capabilities into something reusable. Their documentation therefore has to reconcile vocabulary, platform behavior, authoring, distribution, and lifecycle guidance that several other sections own. That makes Plugins the point where estate-level organization either holds together or starts asking the reader to assemble the system alone.
 
-## 1. What's wrong (prioritized)
+Connectors are the healthiest comparison case because their documentation exposes a broad lifecycle through a developed left navigation. Claude Tag is another positive control for section-level structure. I use both as evidence for what a more coherent path can look like, not as additional audit targets.
 
-**Headline: "plugin" has no canonical definition anywhere in Claude Docs, because the term spans two different capability models the docs don't currently reconcile**
+## 1. What's wrong, prioritized
 
-**P1 — Two unreconciled plugin models; no surface×component matrix.** *(root cause; everything below is a symptom)*
-- A **Claude Code** plugin can contain skills, agents, hooks, MCP servers, LSP servers, background monitors, themes, `bin/` executables, and default settings (documented on code.claude.com).
-- A **Cowork** plugin, per claude.com/docs, is a subset: skills, connectors, agents, hooks.
-- Nowhere on claude.com/docs does one artifact state which components each surface supports. So a Cowork user cannot learn what a *Cowork* plugin can contain without leaving to a Claude-Code-scoped property (code.claude.com) that documents a superset they may not be able to use. Fix the canonical model + matrix and the drift, the sparseness, and the off-property offloading all become enforceable.
+**Headline: the plugin documentation is substantially complete in pieces, but no page owns the cross-surface model and lifecycle as a coherent whole.**
 
-**P2 — The "what a plugin contains" definition drifts four ways.**
-- `plugins/overview`: "MCP connectors, skills, slash commands, and sub-agents" (4, no hooks)
-- `cowork/guide/plugins`: "skills, connectors, subagents, slash commands, or hooks" (5, +hooks)
-- `connectors/building/what-to-build`: "an installable bundle of skills and connectors" (2–3)
-- `claude-tag/admins/skills-repo`: "a plugin bundles one or more skills together" (skills only)
+The problem isn't that the information broadly doesn't exist. The overview, submission page, Claude Code authoring guide, technical reference, support articles, policies, and submission forms collectively cover a great deal. The problem is **distributed completeness**: readers have to reconstruct one journey across page hierarchies, domains, and product surfaces, while several copied definitions and availability claims have already drifted apart.
 
-Any two of these pages give a reader a different answer to "what is a plugin."
+### P1: No canonical cross-surface plugin model
 
-**P3 — A hard availability contradiction (ships broken).** `plugins/overview` says org-wide plugin management is *"coming in the weeks ahead"* (unreleased); `cowork/guide/plugins` documents administrators requiring org-wide plugins that *"install automatically"* (shipped). One page says future, one says present.
+The live pages describe several overlapping plugin models:
 
-**P4 — The plugin pages assume prerequisites and offload setup off-property.** The overview and submission pages name their component primitives without defining or linking them in place, and route the actual "how to build/configure" to code.claude.com. The submission page alone links out to four other properties (code.claude.com ×4, support.claude.com ×2, platform.claude.com ×2, claude.com/plugins). A reader who lands cold can't form a working mental model without leaving. This is the reader-facing cost of P1.
+- `plugins/overview` presents plugins across Claude Code and Cowork and lists skills, MCP connectors, slash commands, and sub-agents.
+- `cowork/guide/plugins` includes hooks as another Cowork component.
+- Current support guidance says plugins can be installed in web Chat, Desktop Chat, and Cowork; skills work across all three, while hooks and sub-agents run only in Cowork.
+- The Claude Code guide and reference document a broader authoring system that includes skills, agents, hooks, MCP and LSP servers, monitors, executables, settings, and other Code-specific mechanics.
 
-**P5 — Terminology + link hygiene (individually minor, cheap, exactly what a gate prevents).** "sub-agents" vs "subagents"; the docs home page emits every product link with a doubled `/docs/docs/...` prefix (resolves via redirect tolerance, but duplicate-URL and fragile); `cowork/guide/plugins` links an alias path (`/docs/cowork/3p/extensions`) absent from the index; undated promissory language ("coming in the weeks ahead") will rot.
+Those statements don't all need to become identical. Some differences are legitimate because the surfaces differ. The failure is that no canonical artifact tells the reader which component or behavior applies on which surface. Silence must remain **unknown**, not be converted into unsupported. A sourced surface-by-component matrix would make both the known support and the documentation gaps explicit.
 
-## 2. Delete / merge — and what happens to readers on those URLs
+### P2: Repeated flat definitions hide surface scope and drift
 
-**Delete: nothing.** No page here is dead weight; the problem is fragmentation and missing canon, not necessarily a surplus of information. Any propsective deletes could happen after page visibility has been resolved and user behavior/page traffic gives metrics and information about where users are congregating for specific information.
+Several pages define plugins by restating a local component list. The overview lists four components, the Cowork guide adds hooks, connector documentation describes a narrower bundle, and Claude Tag frames plugins around skills. Some of this is contextual, but the pages usually don't mark it that way.
 
-**Merge / consolidate under one banner** (the model is Skills and Claude Tag — each a coherent, self-contained section):
-- Establish a single canonical Plugins section on claude.com/docs that owns the cross-product model: what a plugin is, the component set, the **surface×component support matrix**, availability, scopes, and the create/convert/install/marketplace flow.
-- **Pull forward** from code.claude.com (`/en/plugins`, `/en/plugins-reference`) and `plugins/submit` only the *cross-product* concepts + the matrix. **Leave on code.claude.com** the genuinely Code-specific mechanics — the CLI (`claude plugin *`, `--plugin-dir`), the `~/.claude` layout, and the Code-only components (LSP, monitors, themes, `bin/`, the full Claude Code hook-event catalog).
-- **Reinforce by reference, not by copy.** The canonical definition + matrix live in exactly one page; every other page links or embeds it. Repeating the definition inline is what produced the four-way drift in P2 — re-duplicating it would reseed the same problem. Reader reinforcement, single source of truth.
+The result is a definition problem created by duplication. A reader can get different answers to “what can a plugin contain?” without being told whether the difference reflects product behavior, page scope, or stale documentation. One canonical definition plus a surface-aware matrix would let other pages summarize locally without creating another source of truth.
 
-**What happens to readers on the affected URLs:**
-- The code.claude.com plugin pages **stay** (they serve Claude Code developers) and gain a scope banner — "This covers Claude Code plugin specifics; for the cross-product plugin model and Cowork, see claude.com/docs/plugins" — plus an upward link. No redirect, no broken bookmark.
-- Any consolidated or renamed in-estate page gets a redirect from its old path to the canonical one, so existing links and search results resolve.
-- The doubled-prefix and alias links are rewritten to canonical form, so redirect tolerance stops being load-bearing.
+### P3: Availability guidance contradicts newer product guidance
 
-## 3. Proposed information architecture (and what it takes to get there)
+The overview says Cowork plugin support is beta, plugins are saved locally, and organization-wide sharing and management are “coming in the weeks ahead.” Newer Cowork and support guidance documents organization-managed plugins as shipped and says plugins are available across web Chat, Desktop Chat, and Cowork for paid plans.
 
-Target section, modeled on Skills / Claude Tag self-containment. Starting proposal, not final:
+This is more than stale wording. It changes where readers believe plugins work and what administrators can manage. Relative promises such as “coming in the weeks ahead” make the problem predictable because they decay without announcing that they have become wrong.
 
-- **Overview**
-  - What a plugin is — the one canonical definition
-  - Plugin components + **surface×component support matrix** (Cowork vs Claude Code) — the centerpiece artifact
-  - Plugin scopes + availability — single source; resolves the P3 contradiction
-- **Create a plugin**
-  - In Cowork — the full local flow
-  - In Claude Code — short section + link out to the expansive code.claude.com docs
-- **Convert / bundle existing skills & connectors into a plugin**
-- **Next steps**
-  - Discover & install plugins from the marketplace
-  - Set up a marketplace
-  - Reference (link out to code.claude.com plugins-reference)
+### P4: Page ownership and handoffs are under-specified
 
-**What it takes to get there:**
-- Author the canonical artifact *first*: the surface×component matrix + the single definition. Everything else references it.
-- Adopt a frontmatter `assumes:` convention (declared prerequisites per page) so orientation becomes enforceable — see §4.
-- Redirects for any moved/renamed page; scope banners on the code.claude.com plugin pages.
-- Scope estimate: a section consolidation + one net-new canonical page + redirects — **not** a rewrite of every plugin-adjacent page. The interconnected pages get re-pointed at canon, not rewritten.
+The overview and submission pages aren't empty. The overview defines the concept, explains every named component, provides examples, and routes to several next steps. The submission page covers distribution choices, plugin quality, MCP setup, security, eligibility, validation, submission, status, and automatic updates.
 
-## 4. Measurement — and how you'd instrument it
+The practical authoring guide and technical reference also do their jobs well. They own package anatomy, implementation, testing, debugging, migration, schemas, CLI behavior, syncing, caching, troubleshooting, and versioning.
 
-The improvement is real only if the plugin section becomes **self-orienting** (a cold reader forms a working model without leaving the estate) and **internally consistent** (no page contradicts the canon). Both are measurable.
+The reader-facing problem is the handoff between those owners. The overview identifies Claude Code as the origin and build destination, but it doesn't place the authoring guide and technical reference inside a complete lifecycle or route readers to the exact section that owns each next step. The submission page summarizes the happy path but leaves decision-critical review and exception details either one hierarchy away or unstated. Crossing properties isn't the defect. An unframed, premature, or ambiguous crossing is.
 
-**Leading indicator — the conformance gate (Part 3), run in CI:**
-- **Prerequisite-bridging violations.** Each page declares an `assumes:` budget; the gate flags any core concept a page uses that is neither assumed nor linked to its canonical definition on first mention. Metric: unbridged-prerequisite count per page, and % of plugin pages at zero. This is the direct measure of "does the page assume what it shouldn't" — P4 made countable.
-- **Component-set conformance.** Pages enumerating plugin components must match the surface-scoped canonical set; divergence, or a Code-only component named as universal, is flagged (P1/P2).
-- **Off-property offloading.** Plugin pages whose only path to a core concept is an outbound link to code.claude.com / support.claude.com (P4).
-- **Link + term hygiene.** Non-canonical link forms, terminology violations, decaying-time language (P5).
+### P5: Small hygiene problems make the larger drift cheaper to repeat
 
-**User-journey audit (structural, not a vibe-grade).** Define the canonical reader tasks and their minimal in-estate page paths — "understand what a plugin is and what it can contain" (→ Overview); "install a plugin in Cowork" (→ Overview → install → marketplace); "prepare a plugin for submission" (→ Overview → submit). The gate checks each path is traversable following only in-estate links, with every concept bridged and no forced off-property hop for a core step. A break is a located failure, not an opinion.
+The slice also contains terminology variation (`sub-agent` versus `subagent`), non-canonical or redirect-dependent links, uneven component linking, and undated lifecycle language. Each problem is minor alone. Together they are exactly the class of deterministic defect a conformance gate should catch before it becomes estate-wide inconsistency.
 
-**Ground truth — telemetry (the lagging signal):**
-- Off-property exit rate on plugin pages (clicks out to code.claude.com / support).
-- Internal-search zero-result rate for plugin queries.
-- "Was this helpful" votes and plugin-tagged support tickets.
-- Where available, task-completion funnels for the journeys above.
+## 2. Delete or merge, and what happens to readers
 
-The gate predicts; telemetry confirms. **Target state:** the surface×component matrix exists and is linked from every plugin page; zero unbridged-prerequisite violations in the Plugins section; the off-property exit rate on the overview/install pages falls; and "what can a plugin contain / does Cowork support X" tickets drop.
+**Delete nothing.** The pages have legitimate jobs. The problem is unclear ownership and missing connective structure, not obvious dead weight.
+
+Use this page-ownership model:
+
+- **`claude.com/docs/plugins/overview`** owns the cross-product concept, platform relationship, sourced support matrix, availability, and lifecycle map.
+- **`claude.com/docs/plugins/submit`** owns submission readiness, eligibility, review governance, publication outcomes, and exception recovery.
+- **`code.claude.com/docs/en/plugins`** remains the practical authoring tutorial.
+- **`code.claude.com/docs/en/plugins-reference`** remains the technical source of truth.
+- **Anthropic's “Use plugins in Claude” support page** owns installation and use guidance for web Chat, Desktop Chat, and Cowork.
+- **`code.claude.com/docs/en/discover-plugins`** owns plugin discovery and installation in Claude Code.
+
+Reinforce by reference, not by copy. The higher-level pages should summarize decision-critical consequences, state why the destination owns the next step, and link to the precise section or a dedicated task page. The Claude Code pages stay in place because their depth and audience are appropriate. If a page moves or is renamed inside Claude Docs, preserve the old route with a redirect.
+
+## 3. Proposed information architecture, and what it takes to get there
+
+The Plugins overview becomes the lifecycle map:
+
+- **What a plugin is:** one canonical, cross-surface definition.
+- **Where plugins work:** current availability and platform relationship.
+- **What plugins can contain:** a sourced surface-by-component matrix with `supported`, `unsupported`, and `unknown` states.
+- **The lifecycle:** discover, build, validate, submit, publish, and maintain, with each stage naming its owning page.
+- **Next steps:** framed links to the exact authoring, reference, installation, marketplace, and submission sections.
+
+The submission page keeps its existing happy path and adds the decision-critical layer it owns:
+
+- Required inputs and eligibility for each submission surface.
+- How local validation relates to automated safety screening and directory review.
+- Review states and where Claude.ai and Console authors track them.
+- Rejection and remediation paths.
+- Publication outcomes, failed-update behavior, rollback, deprecation, delisting, ownership transfer, and incident handling.
+
+Detailed build procedures, schemas, CLI mechanics, and version resolution stay in the Claude Code guide and reference. The higher-level pages route to them with enough local context that a person or agent can choose the right next step without guessing.
+
+Implementation is bounded: one canonical matrix, one overview update, one submission-layer update, framed links, and any necessary redirects or scope banners. It isn't a rewrite of every plugin-adjacent page.
+
+## 4. Measurement, and how I'd instrument it
+
+The improvement is real only if the slice becomes both **internally consistent** and **task-complete across its handoffs**.
+
+### Leading indicator: the conformance gate
+
+Run the Part 3 gate in CI against deterministic rules:
+
+- **Surface-claim conformance:** component and availability claims must name a surface and match the sourced matrix. Unknown cells remain a confirmation backlog, not automatic failures.
+- **Canonical ownership:** copied definitions, contradictory availability statements, and duplicated lifecycle facts are flagged against their owner.
+- **Prerequisite bridging:** core concepts are linked on first mention unless the page explicitly declares them as assumed knowledge.
+- **Contextualized handoffs:** a decision-critical cross-property link must summarize the relevant consequence, name why the destination owns the step, and target the precise section or a registered dedicated task page.
+- **Link, terminology, and freshness checks:** flag non-canonical routes, terminology drift, and undated relative-time promises.
+
+### Structural journey checks
+
+Define representative tasks and their expected owners:
+
+- Understand what a plugin is and where it works.
+- Choose a target surface and supported component set.
+- Build and test a plugin.
+- Prepare and submit it.
+- Interpret review status or recover from rejection.
+- Understand how a published community plugin updates or rolls back.
+
+The check isn't “did the reader stay on one domain?” It is “could the reader identify the next owner, understand why the handoff was happening, and land on the exact guidance needed?” A broken or ambiguous handoff is a located defect rather than a subjective depth score.
+
+### Lagging signals
+
+- Completion and abandonment across the documented lifecycle paths.
+- Click-through and return behavior at framed cross-property handoffs.
+- Internal-search reformulation and zero-result rates for plugin tasks.
+- “Was this helpful?” results and plugin-tagged support tickets.
+- Repeated questions about surface support, validation versus review, update behavior, and recovery paths.
+
+The gate predicts where the documentation can fail. Reader behavior and support data confirm whether those failures matter. The target state is not fewer outbound clicks by itself; it is fewer ambiguous handoffs, fewer contradictory claims, and higher completion of the task the reader came to perform.

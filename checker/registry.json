@@ -1,0 +1,17 @@
+{
+  "_comment": "Declared inputs for the conformance gate. Maintained WITH the docs (Part 3 anti-staleness). owner_match is a distinctive substring of the concept's owning-page URL; a link whose target contains it counts as bridging that concept (S4).",
+  "concepts": {
+    "plugin":        {"aliases": ["plugins", "plugin"], "owner_match": "plugins/overview"},
+    "skill":         {"aliases": ["skills", "skill"], "owner_match": "skills/overview"},
+    "connector":     {"aliases": ["mcp connectors", "mcp connector", "connectors", "connector"], "owner_match": "connectors/overview"},
+    "slash command": {"aliases": ["slash commands", "slash command"], "owner_match": "plugins-reference#skills"},
+    "sub-agent":     {"aliases": ["sub-agents", "sub-agent", "subagents", "subagent"], "owner_match": "plugins-reference#agents"},
+    "hook":          {"aliases": ["hooks", "hook"], "owner_match": "plugins-reference#hooks"}
+  },
+  "off_property_hosts": ["code.claude.com", "support.claude.com"],
+  "dedicated_task_pages": [
+    "https://support.claude.com/en/articles/13837440-use-plugins-in-claude",
+    "https://code.claude.com/docs/en/discover-plugins"
+  ],
+  "ownership_cues": ["owns", "authoring home", "reference", "canonical", "source of truth", "own the", "owns the", "home for", "owns authoring"]
+}

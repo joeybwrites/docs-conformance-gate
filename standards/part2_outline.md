@@ -1,38 +1,40 @@
-# Part 2 — Standard + Content-Type Template (ROUGH OUTLINE)
+# Part 2 delivery map
 
-Status: rough scaffold, to be populated from Part 1 (P1–P5). Not locked.
+Status: Final. This file is the map for the three Part 2 artifacts, not a fourth deliverable.
 
-The prompt requires rules "a reviewer — or a machine — could apply the same way twice." So every rule is written to be machine-checkable, which wires it straight into the Part 3 gate (`notes/checker_design.md`).
+## Thesis carried forward from Part 1
 
-## A. Style spec — the conformance rules (excerpt)
+The plugin documentation is substantially complete across the estate but fragmented across pages, properties, and product surfaces. Part 2 standardizes page ownership, surface-scoped claims, contextualized handoffs, and decision-critical summaries. It does not duplicate the Claude Code authoring guide or technical reference.
 
-Each rule: the rule (imperative, testable) · the P# it prevents · the machine check.
+## Deliverables
 
-- **S1 — Canonical definition, single source.** Each core concept (plugin, skill, connector, MCP, slash command, sub-agent, hook) is DEFINED on exactly one canonical page; every other mention links to it, none restates the definition inline. [prevents P2 drift] — check: the definition phrase appears on >1 page = fail.
-- **S2 — Surface-scoped claims.** Any statement of what a plugin contains / where it works names the surface (Cowork vs Claude Code) or references the canonical surface×component matrix. A surface-specific component stated as universal = fail. [P1] — check: component enumeration vs the registry's surface set.
-- **S3 — Single availability source, dated.** Availability/lifecycle status lives in one place; no page contradicts it; no undated relative-time promises ("coming soon", "in the weeks ahead"). [P3, P5] — check: availability claim vs canonical + relative-time regex.
-- **S4 — Prerequisite bridging.** Every core concept a page uses that is not in its `assumes:` frontmatter links to its canonical page on first mention. [P4] — check: R-B.
-- **S5 — In-estate core path.** A core task step is completable without an outbound hop off-property; off-property links are "for more depth," never the only path. [P4] — check: R-D.
-- **S6 — Canonical link form + terminology.** No doubled-prefix/alias link forms; canonical terms only (sub-agent). [P5] — check: R-C, R-E.
+1. **`plugin_style_guide.md`**
+   - Defines the page-ownership model.
+   - Provides eight deterministic conformance rules.
+   - Defines role-specific templates for overview, submission, and creation pages.
 
-## B. Content-type template — "Capability overview page"
+2. **`plugin_component_matrix.md`**
+   - Proposes the canonical surface-by-component model.
+   - Uses evidence-bounded `supported`, `unsupported`, and `unknown` states.
+   - Preserves contradictions and documentation silence instead of guessing through them.
 
-The type the plugin overview IS. A page of this type MUST contain, in order:
+3. **`plugin_overview_before_after.md`**
+   - Applies the standard to one bounded page: `plugins/overview`.
+   - Makes the overview the lifecycle map.
+   - Gives Cowork a concrete first-use path instead of naming it only as a supported surface.
+   - Frames precise handoffs to the pages that own authoring, reference, installation, and submission.
 
-- **Frontmatter:** `title`, `assumes: [...]`, `canonical_for: [...]` (concepts this page is the single source of truth for)
-- **What it is** — the 1–2 sentence canonical definition (if `canonical_for`), else a link to it
-- **What it contains / components** — the component set; if surface-varying, the **surface×component matrix** (required for plugins)
-- **Where it works + availability** — surface support + status, single-sourced, dated
-- **Scopes / governance** (if applicable)
-- **Get started / create** — the E2E happy path per surface, in-estate; link out only for depth
-- **Next steps** — install / marketplace / reference links
+## Scope boundary
 
-Cross-cutting rules: every primitive named in any section links to its canonical page (S4); every "contains/works" claim is surface-scoped (S2) and single-sourced (S1/S3).
+- `claude.com/docs/plugins/overview` owns the cross-product concept, platform relationship, support matrix, availability, lifecycle map, and concise surface-use orientation.
+- `claude.com/docs/plugins/submit` owns submission readiness, governance, outcomes, and exceptions.
+- `code.claude.com/docs/en/plugins` owns practical authoring.
+- `code.claude.com/docs/en/plugins-reference` owns technical specifications and mechanics.
+- Anthropic's “Use plugins in Claude” support page owns the full installation, use, customization, marketplace, and management procedures for web Chat, Desktop Chat, and Cowork.
+- `code.claude.com/docs/en/discover-plugins` owns discovery and installation in Claude Code.
 
-## C. Before/after rewrite target
-Candidate: **`plugins/submit`** (carries P4 sparseness + a P2 definition conflict) OR **`plugins/overview`** (highest traffic, home of the matrix). [pending Joey]
+Cross-property links are not defects. A handoff fails only when it is unframed, ambiguous, premature, or aimed at the wrong destination.
 
-## D. To populate from Part 1
-- Fill the surface×component matrix from the two-models finding (Cowork subset vs Claude Code full set).
-- Seed the concept registry (S1/S4) from the primitives list.
-- Pull the exact drift quotes (P2) as the "what this rule prevents" examples.
+## Part 3 connection
+
+The Part 3 gate should prototype one or two rule families end to end on the real corpus. The remaining Part 2 rules can be designed and represented as future checks without expanding the implementation scope.
