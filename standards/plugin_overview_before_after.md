@@ -1,32 +1,116 @@
 # Part 2 before/after: `plugins/overview`
 
-Status: Final.
+Status: Publication draft with explicit editorial dependencies. The reader-facing rewrite below is submission-ready prose; the two dependencies it can't resolve on its own (the confirmed Chat/Cowork availability model and the matrix's `unknown` cells) are named as editorial dependencies rather than papered over, because the product/docs team owns those answers. This is not "Final" in the sense of no open questions — it is complete as a governed draft that states its open questions instead of inventing answers.
 
 **Why this page.** The plugin docs are substantially complete but fragmented: discovery, building, validation, submission, publication, and maintenance each live somewhere, but no page assembles them. The reader has to do that work. The overview is the natural lifecycle map, but it still has to work as an overview. This rewrite preserves the explanation, examples, and practical orientation of the live page, then gives that writing a stronger spine: a cross-product model, an evidence-bounded matrix, and framed handoffs to the pages that own each stage.
 
 ---
 
-## BEFORE (current page, condensed with issues flagged)
+## BEFORE (current live page, reproduced verbatim)
 
-> **Plugins overview:** *…bundle MCP connectors, skills, slash commands, and sub-agents.* `[P2: flat, surface-blind definition; omits hooks that cowork/guide/plugins includes]`
->
-> **What plugins do:** explains the value of packaging workflows, tools, and instructions together. `[keep: useful reader orientation and product value]`
->
-> **Plugin directory:** shows 11 role- and workflow-based examples. `[keep: makes the abstraction concrete]`
->
-> **Origins in Claude Code:** explains the directory and manifest model. `[keep, then clarify the relationship among Claude Code, Chat, Desktop, and Cowork]`
->
-> **How plugins compose capabilities:** explains Skills, MCP connectors, Slash commands, and Sub-agents. `[keep the explanatory table; add hooks, consistent links, and surface scope]`
->
-> **Availability:** says Cowork support is beta and organization-wide management is “coming in the weeks ahead.” `[P3/P5: contradicted elsewhere and guaranteed to decay]`
->
-> **Next steps:** points to the directory, Claude Code creation guide, Skills, and Connectors. `[P4/S5: useful destinations, but not assembled into a lifecycle or consistently routed to the section that owns the next task]`
+Source: [`claude.com/docs/plugins/overview`](https://claude.com/docs/plugins/overview), retrieved 2026-08-31 via `checker/fetch_corpus.py`. Reproduced exactly as fetched (the page is authored in MDX, so its `<Note>` / `<Columns>` / `<Card>` components appear as written); only the `.md` export's leading llms.txt documentation-index banner is omitted, as it is a fetch artifact and not page content.
 
-The current page isn't empty. Its strongest material should survive. The missing layer is the connective model that tells readers where plugins work, how the component set changes by surface, and where to go after orientation.
+````markdown
+# Plugins overview
+
+> Extend Claude with reusable capability packages that bundle MCP connectors, skills, slash commands, and sub-agents
+
+Plugins are reusable capability packages that extend Claude with custom functionality. They bundle together [MCP connectors](/docs/connectors/overview), [skills](/docs/skills/overview), slash commands, and sub-agents into a single shareable unit — turning Claude into a specialist tailored to your role, team, and company.
+
+## What plugins do
+
+Plugins let you define how you like work done, which tools and data to pull from, how to handle critical workflows, and what slash commands to expose so your team gets consistent outcomes. Every component is file-based, so plugins are easy to build, edit, and share.
+
+As your team builds and shares plugins, Claude becomes a cross-functional expert. Best practices get baked into every interaction, so leaders and admins can spend less time enforcing processes and more time improving them.
+
+## Plugin directory
+
+To help you get started, Anthropic has open-sourced 11 plugins built and used internally:
+
+| Plugin                 | What it does                                                  |
+| ---------------------- | ------------------------------------------------------------- |
+| **Productivity**       | Manage tasks, calendars, and daily workflows                  |
+| **Enterprise search**  | Find information across your company's tools and docs         |
+| **Sales**              | Research prospects, prep deals, and follow your sales process |
+| **Finance**            | Analyze financials, build models, and track key metrics       |
+| **Data**               | Query, visualize, and interpret datasets                      |
+| **Legal**              | Review documents, flag risks, and track compliance            |
+| **Marketing**          | Draft content, plan campaigns, and manage launches            |
+| **Customer support**   | Triage issues, draft responses, and surface solutions         |
+| **Product management** | Write specs, prioritize roadmaps, and track progress          |
+| **Biology research**   | Search literature, analyze results, and plan experiments      |
+| **Plugin Create**      | Create and customize new plugins from scratch                 |
+
+Browse the full collection at [claude.com/plugins](https://claude.com/plugins-for/cowork) or use the Plugin Create plugin to build your own.
+
+## Origins in Claude Code
+
+Plugins originated in [Claude Code](https://code.claude.com/docs/en/plugins), where developers create and distribute them as versioned, shareable directories. A Claude Code plugin lives in a directory with a manifest (`plugin.json`) that defines its identity, version, and available components.
+
+<Note>
+  For technical details on plugin structure, manifests, and configuration, see the [Claude Code plugins reference](https://code.claude.com/docs/en/plugins-reference).
+</Note>
+
+## Plugins in Cowork
+
+Plugins are fully supported in [Cowork](https://support.claude.com/en/articles/13345190-getting-started-with-cowork), Anthropic's agentic workspace for complex, multi-step knowledge work. In Cowork, Claude runs inside an isolated virtual machine environment, executes tasks in parallel workstreams, and writes outputs directly to your file system — and plugins extend all of that capability.
+
+A sales plugin, for example, could connect Claude to your CRM and knowledge base, teach it your sales process, and give you slash commands for everything from prospect research to call follow-ups. You define what goes in the plugin once, and Claude pulls from that context whenever it's relevant.
+
+## How plugins compose capabilities
+
+| Plugin component   | What it adds                                                      | Example                                                                         |
+| ------------------ | ----------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| **Skills**         | Specialized instructions Claude follows when relevant tasks arise | A "brand voice" skill that activates when drafting external communications      |
+| **MCP connectors** | Access to external tools and data                                 | A connector to a CRM that lets Claude read and update deal records              |
+| **Slash commands** | Explicit, user-triggered workflows                                | `/sales:prospect-research` to kick off a structured research workflow           |
+| **Sub-agents**     | Delegated workstreams that run in parallel                        | A sub-agent that handles competitive analysis while another drafts the proposal |
+
+## Availability
+
+Plugin support in Cowork is available as a beta for all paid Claude users. Plugins are currently saved locally to your machine. Org-wide sharing and management are coming in the weeks ahead.
+
+| Platform          | Plugin support                                                     |
+| ----------------- | ------------------------------------------------------------------ |
+| **Claude Code**   | Full plugin support — create, install, and use plugins             |
+| **Claude Cowork** | Full plugin support — plugins extend agentic, multi-step workflows |
+
+Looking to submit your own plugin? See [Submitting your plugin](/docs/plugins/submit#submitting-your-plugin).
+
+## Next steps
+
+<Columns cols={2}>
+  <Card title="Plugin directory" icon="grid-2" href="https://claude.com/plugins-for/cowork">
+    Browse the full plugin collection.
+  </Card>
+
+  <Card title="Create plugins" icon="code" href="https://code.claude.com/docs/en/plugins">
+    Build and distribute plugins in Claude Code.
+  </Card>
+
+  <Card title="Skills overview" icon="sparkles" href="/docs/skills/overview">
+    Learn how skills work as a core plugin component.
+  </Card>
+
+  <Card title="Connectors overview" icon="plug" href="/docs/connectors/overview">
+    Understand MCP connectors that plugins can bundle.
+  </Card>
+</Columns>
+````
+
+**Problems flagged in the current page (mapped to the audit).** The page isn't empty — its value proposition, examples, and component table should survive. The issues are:
+
+- **Opening definition** — flat and surface-blind (`bundle MCP connectors, skills, slash commands, and sub-agents`); omits hooks, which the Cowork guide includes as a component. *(P2)*
+- **Origins in Claude Code** — explains the directory/manifest model but never clarifies the relationship among Claude Code, Chat, Desktop, and Cowork. *(P1)*
+- **How plugins compose capabilities** — the explanatory table is worth keeping, but it lists no hooks, links none of the primitives, and states no surface scope. *(P1, P2, P4)*
+- **Availability** — says Cowork support is beta and org-wide management is "coming in the weeks ahead"; the relative-time promise is guaranteed to decay, and the Chat availability picture is contradicted elsewhere in the estate. *(P3, P5)*
+- **Next steps** — points to useful destinations (directory, Claude Code creation guide, Skills, Connectors) but doesn't assemble them into a lifecycle or route the reader to the section that owns each next task. *(P4)*
+
+The missing layer is the connective model: where plugins work, how the component set changes by surface, and where to go after orientation.
 
 ---
 
-## AFTER (complete overview rewrite)
+## AFTER (overview rewrite — publication draft with explicit editorial dependencies)
 
 ```yaml
 ---
@@ -41,13 +125,13 @@ canonical_for: [plugin]
 
 Plugins are reusable capability packages that turn Claude into a specialist for a role, team, or workflow. A plugin can combine instructions, tools, data connections, and delegated work into one shareable unit, so people don't have to rebuild the same setup one piece at a time.
 
-The components a plugin can use depend on where it runs. This page is the starting point for the cross-product model and the plugin lifecycle. Use the [surface-by-component support matrix](./plugin_component_matrix) for sourced support details, then follow the lifecycle links below when you're ready to install, build, submit, or maintain one.
+The components a plugin can use depend on where it runs. This page is the starting point for the cross-product model and the plugin lifecycle. Use the [surface-by-component support matrix](./plugin_component_matrix.md) for sourced support details, then follow the lifecycle links below when you're ready to install, build, submit, or maintain one.
 
 ## What plugins do
 
 Plugins let you define how Claude should approach recurring work, which tools and data it can use, and which workflows people can invoke directly. Because plugin components are file-based, teams can review, test, version, and share the same operating context instead of relying on one person's setup.
 
-A sales plugin, for example, could connect Claude to a CRM and knowledge base, teach it the team's sales process, expose a command for prospect research, and delegate competitive analysis to a sub-agent. The connector supplies access, the skill supplies judgment and process, the command gives the user a reliable entry point, and the sub-agent handles a bounded parallel task. Together they create a coherent workflow; separately they are building blocks.
+A sales plugin, for example, could connect Claude to a CRM and knowledge base, teach it the team's sales process, expose a [slash command](https://code.claude.com/docs/en/plugins-reference#skills) for prospect research, and delegate competitive analysis to a [sub-agent](https://code.claude.com/docs/en/plugins-reference#agents). The [connector](/docs/connectors/overview) supplies access, the [skill](/docs/skills/overview) supplies judgment and process, the command gives the user a reliable entry point, and the sub-agent handles a bounded parallel task. Together they create a coherent workflow; separately they are building blocks.
 
 ## Start with an existing plugin
 
@@ -71,32 +155,29 @@ Anthropic publishes plugins for common roles and workflows. These examples are u
 
 ## Where plugins work
 
-Plugins originated in Claude Code, which remains the authoring home for package structure, testing, debugging, and distribution. Plugins can also package capabilities for Claude's conversational and collaborative surfaces, but the component set changes by surface.
+Plugins originated in Claude Code. Claude Code documentation owns technical package authoring and structure — the package layout, testing, debugging, and distribution model. Plugins can also package capabilities for Claude's conversational and collaborative surfaces, but the component set changes by surface.
 
-> **Editorial dependency:** Before publication, confirm the canonical availability model for web Chat, Desktop Chat, and Cowork. Current official guidance conflicts on Chat support. Replace this note and the provisional rows below with one product-approved statement; don't ask readers to reconcile the sources themselves.
+The table below is orientation, not a second canonical component list. The [surface-by-component support matrix](./plugin_component_matrix.md) is the source of record for what each surface supports, including the cells the documentation currently leaves unknown; use this table to get your bearings and the matrix to settle any specific question.
+
+One conflict is worth surfacing here rather than hiding, because it is a live documentation-governance gap and not a reader error: the Cowork guide states that plugins are **not** used in Chat, while the Claude support article describes plugin availability **in** Chat. The overview does not resolve this by choosing a side. Until the product and docs teams reconcile the two sources, treat Chat availability as unresolved and defer to the matrix.
 
 | Surface | Use it for | Important distinction |
 |---|---|---|
-| **Web Chat** | `[Confirm before publication]` | `[Confirm supported plugin components]` |
-| **Desktop Chat** | `[Confirm before publication]` | `[Confirm supported plugin components]` |
-| **Cowork** | Complex, multi-step work that can use files and delegated workstreams | Supports skills, connectors, slash commands, sub-agents, and hooks; see the matrix for components the docs leave unknown |
+| **Chat (web and desktop)** | Conversational plugin use — but availability is disputed across official sources (see the note above) | Sources conflict on whether plugins run in Chat and which components apply; the [matrix](./plugin_component_matrix.md) is canonical |
+| **Cowork** | Complex, multi-step work that can use files and delegated workstreams | Supports skills, connectors, slash commands, sub-agents, and [hooks](https://code.claude.com/docs/en/plugins-reference#hooks); see the [matrix](./plugin_component_matrix.md) for components the docs leave unknown |
 | **Claude Code** | Building, testing, debugging, and distributing plugins | The authoring guide and technical reference own the full implementation model |
 
 ## Use plugins in Cowork
 
-Cowork is where a plugin can become more than a set of instructions. In addition to the skills and connectors available through the package, Cowork can run hooks at defined points in a workflow and delegate bounded work to sub-agents. That makes it the right surface for plugins built around multi-step work, files, or parallel workstreams.
+Chat can already combine skills and connectors, so packaging those is not what sets Cowork apart. The defensible distinction is narrower: Cowork can **run hooks and delegate to sub-agents**, which Chat does not. That makes Cowork the right surface for plugins built around multi-step work, files, or parallel workstreams — the same package that would only supply instructions and data access in Chat can additionally fire validation hooks and hand bounded tasks to sub-agents here.
 
-To install one, open the **Cowork** tab, then go to **Customize → Plugins → Browse plugins** and select **Install**. After installation, type `/` or select the **+** button to see the skills the plugin added. Select a skill to view its details. Hooks and sub-agents are separate plugin components; their behavior is defined by the plugin rather than by that skills menu.
+Installing, invoking, and customizing a plugin in Cowork all happen through the Cowork interface: you browse and install from the **Customize → Plugins** panel, surface the skills a plugin added with `/` or the **+** button, and use **Customize** to adapt an installed plugin around your workflow. Manually uploaded plugins are stored locally on your own machine, so trust matters — install only from sources you trust, especially when a package bundles a local MCP server that runs with local permissions.
 
-You can also adapt an installed plugin without rebuilding it from scratch. Open the plugin, select **Customize** in the upper-right corner, and Cowork starts a new task with a prompt for modifying the plugin. Select **Let's go**, then work with Claude to adjust its skills and connectors around your workflow.
-
-Plugins uploaded manually through Cowork are stored locally on your computer. A plugin can still connect to cloud services, but custom connectors used in Cowork must point to a server Anthropic can reach over the public internet; they can't rely on a service available only inside your local network. Only install plugins from sources you trust, especially when a package includes a local MCP server that can run with local permissions.
-
-For the current installation interface, marketplace controls, and organization-managed behavior, see [Use plugins in Claude](https://support.claude.com/en/articles/13837440-use-plugins-in-claude).
+This overview does not reproduce the full click-path, because that interface and its marketplace and organization-management controls change and are owned elsewhere. [Use plugins in Claude](https://support.claude.com/en/articles/13837440-use-plugins-in-claude) owns the complete install, use, customize, and management path; follow it for the current steps.
 
 ## How plugins compose capabilities
 
-A plugin can combine several component types. The table below explains the job each component does; the [support matrix](./plugin_component_matrix) remains the source for where each one is supported.
+A plugin can combine several component types. The table below explains the job each component does; the [support matrix](./plugin_component_matrix.md) remains the source for where each one is supported.
 
 | Component | What it adds | Example |
 |---|---|---|
@@ -132,19 +213,16 @@ These cross-property links are intentional handoffs. Each one tells you what dec
 
 ## Availability and management
 
-Plugins are available in Claude Code. Claude also supports organization-managed plugin distribution, including plugins that are optional, automatically installed, or required.
+Plugins are available in Claude Code today. Claude also supports organization-managed plugin distribution, so an administrator can make a plugin optional, install it automatically, or require it. Availability across the conversational surfaces — Chat and Cowork — is the part the documentation does not yet state consistently; see the conflict flagged under **Where plugins work** and defer to the [support matrix](./plugin_component_matrix.md) for the current per-surface picture. This page deliberately avoids relative timing promises such as “coming in the weeks ahead,” which decay into inaccuracy the moment they ship.
 
-> **Editorial dependency:** Add the confirmed plan and surface availability statement here before publication, with a dated support source or changelog. Avoid relative promises such as “coming in the weeks ahead,” which quickly become stale.
+> **Editorial dependency (draft):** One item here is not yet resolvable from the documentation and is owned by the product/docs team: the confirmed cross-surface availability model. When it is settled, state it in this section with a dated support source or changelog entry, and reconcile the Chat/Cowork conflict called out above. This note is why the artifact is labeled a publication draft rather than final.
 
 ## Next steps
 
-- **Use a plugin:** [Browse the directory](https://claude.com/plugins-for/cowork) or [install one in Claude](https://support.claude.com/en/articles/13837440-use-plugins-in-claude).
-- **Use one in Cowork:** Install it from **Cowork → Customize → Plugins**, then find its skills with `/` or the **+** button and select one to view its details.
-- **Build and test:** Follow the [Claude Code plugin quickstart](https://code.claude.com/docs/en/plugins#quickstart).
-- **Check a technical requirement:** Use the [plugins reference](https://code.claude.com/docs/en/plugins-reference).
-- **Submit publicly:** Review [submission readiness and directory requirements](/docs/plugins/submit#submitting-your-plugin).
-- **Install in Claude Code:** Use [Discover and install plugins](https://code.claude.com/docs/en/discover-plugins).
-- **Resolve platform support:** Check the [surface-by-component matrix](./plugin_component_matrix).
+The lifecycle table above is the routing hub: pick the stage that matches your task — discover, install, use, build, validate, submit, publish, or maintain — and follow the owner it names. It already carries those links, so they are not repeated here. Two orientation shortcuts are worth keeping close:
+
+- **Try one now:** [browse the directory](https://claude.com/plugins-for/cowork) or [install a plugin in Claude](https://support.claude.com/en/articles/13837440-use-plugins-in-claude).
+- **Settle a per-surface support question:** consult the canonical [surface-by-component matrix](./plugin_component_matrix.md).
 
 ---
 
@@ -153,12 +231,16 @@ Plugins are available in Claude Code. Claude also supports organization-managed 
 | Change | Fixes | Rule |
 |---|---|---|
 | Preserved the live page's value proposition, examples, component explanations, and directory orientation | prevents the lifecycle model from becoming an IA skeleton | content quality |
-| Added a complete Cowork use path covering installation, invocation, customization, connector reachability, and local-package trust | prevents the cross-product model from stopping at surface identification | S1, S7, S8 |
+| Linked the first meaningful mention of each primitive (skill, connector, slash command, sub-agent, hook) to its owner, so the prose and the Cowork/surface sections no longer name them bare before the component table links them | primitives appeared bare ahead of the table | S4 |
+| Narrowed "Claude Code is the authoring home" to "Claude Code documentation owns technical package authoring and structure" | over-broad ownership claim | S1 |
+| Compressed the Cowork section from a full install/customize/local-storage procedure to orientation plus a framed handoff to the Support page that owns install/use/customize/management | the overview was duplicating an owned procedure | S1, S5, S7 |
+| Replaced the "more than a set of instructions" framing with the defensible distinction that Cowork runs hooks and sub-agents while Chat does not (Chat also combines skills and connectors) | prior claim was not the real differentiator | S1 |
 | Added a written platform relationship and a sourced support matrix | P1, P2 | S1, S2 |
-| Kept the explanatory component table while moving support claims into the matrix | P1, P2, P4 | S1, S2, S4 |
-| Added the lifecycle map, with each stage naming its owner or follow-up gap | fragmentation | S7 |
+| Kept the explanatory component table while moving support claims into the matrix, and fixed every matrix link to the repository-valid `./plugin_component_matrix.md` path | P1, P2, P4; broken relative links | S1, S2, S4 |
+| Added the lifecycle map, with each stage naming its owner or follow-up gap; compressed "Next steps" so it stops re-listing the lifecycle links | fragmentation; duplication | S7 |
 | Replaced unscoped root links with framed handoffs to the guide, reference, support, and submission owners | P4 | S5 |
-| Replaced the decaying availability promise with a dated fact-check dependency and kept the source contradiction out of reader-facing copy | P3, P5 | S3 |
+| Replaced the decaying availability promise with a labeled editorial dependency, and surfaced the Chat-availability source contradiction to readers as a governance flag instead of resolving it by picking a source | P3, P5 | S3 |
+| Removed the `[Confirm before publication]` placeholder cells and relabeled the artifact a publication draft with explicit editorial dependencies, rather than calling it "Final" while author TODOs sat in reader-facing tables | placeholder tokens in reader copy | S3 |
 | Scoped validation, screening, community-catalog pinning, nightly sync, and version resolution to the contexts that document them | corrects “the docs lack information” without universalizing downstream mechanics | S1, S5 |
 | Added agentic build guidance without creating a second agent-only source of truth | agentic usability | S7, S8 |
 

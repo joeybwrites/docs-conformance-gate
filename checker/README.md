@@ -22,7 +22,7 @@ Declared inputs live in `registry.json` (concept→owner registry, off-property 
 
 Findings roll up into one **non-compensating** verdict per page — the page's tier is its *worst* finding.
 
-| Verdict | Triggered by | CI |
+| Verdict | Triggered by | Exit |
 |---|---|---|
 | **Ship** | no findings | pass (exit 0) |
 | **Ship with Notes** | only `note`-severity findings (S6) | pass (exit 0) |
@@ -33,7 +33,7 @@ Findings roll up into one **non-compensating** verdict per page — the page's t
 
 **Levers, not code.** The rule→severity map, tier names, `contradiction_patterns`, and `batch_clauses` all live in `registry.json`; retune them without touching `conformance_gate.py`. Worked examples per tier are in `fixtures/verdicts/` (`NOTES.md` has the note returned to the owning team).
 
-**Batch verdict.** Point the gate at many pages (a PR's changeset) and it emits one **batch disposition**, non-compensating across the set — the worst page holds the batch. Exit code = number of blocking files (Revise/Reject); Ship / Ship with Notes exit 0.
+**Batch verdict.** Point the gate at many pages (a PR's changeset) and it emits one **batch disposition**, non-compensating across the set — the worst page holds the batch. Exit code = number of blocking files (Revise/Reject), capped at 100; Ship / Ship with Notes exit 0.
 
 ## Input contract
 
@@ -42,6 +42,7 @@ The gate expects **one actual doc page with top-level frontmatter.** A pre-stand
 ## Run it
 
 ```bash
+python test_gate.py                       # expectation-based regression suite (asserts verdicts)
 python fetch_corpus.py                    # pull the curated real-corpus slice into corpus/
 python conformance_gate.py fixtures/      # ALL fixtures (recursive: rule, verdict, rigor)
 python conformance_gate.py corpus/        # the live 5-page slice
@@ -52,9 +53,9 @@ python conformance_gate.py --json corpus/plugins_overview.md
 
 ## What it found on the real corpus
 
-`fetch_corpus.py` pulls a **curated 5-page slice** of the live docs — it does **not** derive the full corpus from `llms.txt`. That slice, run 2026-08-31, yields **62 findings**, all pages Revise:
+`fetch_corpus.py` pulls a **curated 5-page slice** of the live docs — it does **not** derive the full corpus from `llms.txt`. That slice, run 2026-08-31, produces **62 raw findings**, all pages Revise. These are the checker's **raw output, not an adjudicated list of confirmed defects** — every page's FM finding is expected (no live page carries the proposed frontmatter yet), and a share of the S4 count is downstream of that same missing frontmatter. The table below is the machine's read, with the signal worth a human's attention called out:
 
-| Page | Findings | Real signal |
+| Page | Raw findings | Signal worth a look |
 |---|--:|---|
 | `docs/index` (home) | 30 | 26 doubled `/docs/docs/` links (S6) — the estate's front door |
 | `plugins/submit` | 11 | unlinked-first-mention primitives + unframed off-property handoffs |
@@ -62,7 +63,7 @@ python conformance_gate.py --json corpus/plugins_overview.md
 | `cowork/guide/plugins` | 7 | names the primitives, links none at first mention |
 | `connectors/overview` | 6 | unlinked-first-mention primitives |
 
-Every page also carries an FM finding: none of the live pages carry the standard's frontmatter yet.
+Every page also carries an FM finding, and because missing frontmatter disables the `assumes:`/`canonical_for:` exemptions, some S4 findings on these pages may be phantoms — the checker says so in the FM finding itself. The 62 is a starting point for triage, not a defect count to report upward.
 
 **The 10-of-17 "cross-reference pages don't link plugins" figure is design evidence** from a broader estate sweep — it is *not* exercised by this five-page run, which is a focused demonstration slice.
 
@@ -86,15 +87,16 @@ Tested against the real before/after and corpus; the following were found and fi
 
 **False-positive tolerance:** tuned toward recall — a missed bridge/handoff confuses a reader; a false flag costs a writer ~10s. The dominant FP source (missing frontmatter) is designed to disappear as pages adopt the standard, demonstrated by `fixtures/pass_overview.md` running clean.
 
-**Degradation:** violation count tracked in CI; the fixtures are the regression suite (`fail_*` must fire, `pass_overview` must stay clean). A concept frequent across the estate but absent from `registry.json` signals the registry going stale.
+**Regression suite:** `test_gate.py` asserts the expected verdict and rule set for every fixture, including the hardening negatives (same-line first mention, inline code, HTML comments, vague S5 labels, lookalike owner URLs, block-list frontmatter arrays). Run it as the regression gate — `fail_*` must fire, `pass_overview` must stay clean. A concept frequent across the estate but absent from `registry.json` signals the registry going stale.
 
-**Anti-staleness:** runs in CI on every docs PR and fails loudly; declared inputs live with the docs; deterministic, so a reviewer can always see *why* a line was flagged.
+**Anti-staleness (design intent):** wired into a docs-PR CI job (none is included here) it would fail loudly on every change; declared inputs live with the docs; and it is deterministic, so a reviewer can always see *why* a line was flagged.
 
 ## Files
 
 - `conformance_gate.py` — the checker
+- `test_gate.py` — expectation-based regression suite (asserts verdict + rules per fixture)
 - `registry.json` — declared inputs + levers
 - `fetch_corpus.py` — pulls the curated 5-page slice
-- `fixtures/` — rule fixtures (incl. `fail_s4_first_mention.md`), `verdicts/` (per-tier + `NOTES.md`), `rigor/` (non-compensating + code-fence)
+- `fixtures/` — rule fixtures (incl. `fail_s4_first_mention.md`), `verdicts/` (per-tier + `NOTES.md`), `rigor/` (non-compensating, code-fence, and the six hardening negatives)
 - `corpus/` — the fetched slice (gitignored; reproducible via `fetch_corpus.py`)
 - `sample_output.txt` — captured run (all fixtures, corpus, the meta-doc demo, and JSON)

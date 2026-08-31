@@ -1,6 +1,6 @@
 # Part 2 delivery map
 
-Status: Final. This file is the map for the three Part 2 artifacts, not a fourth deliverable.
+Status: Settled. This file is the map for the three Part 2 artifacts, not a fourth deliverable.
 
 ## Thesis carried forward from Part 1
 

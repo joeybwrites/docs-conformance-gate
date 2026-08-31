@@ -1,6 +1,6 @@
 # Part 1: Audit memo for Plugins
 
-Status: Final.
+Status: Analysis settled; the prose is an AI-assisted draft for Joey's voice pass.
 
 ## Slice, and why Plugins
 

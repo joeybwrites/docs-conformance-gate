@@ -19,8 +19,9 @@ Implements a deterministic subset of the plugin documentation standard
   FM  frontmatter contract    - required fields present and well-typed.
 
 Findings roll up into a non-compensating verdict (Ship / Ship with Notes /
-Revise / Reject). Exit code = number of BLOCKING files (Revise or Reject);
-Ship and Ship with Notes exit 0, so it drops straight into CI.
+Revise / Reject). Exit code = number of BLOCKING files (Revise or Reject),
+capped at 100; Ship and Ship with Notes exit 0. That makes it suitable to drop
+into a CI job later (no CI config is included in this prototype).
 
     python conformance_gate.py fixtures/ corpus/
     python conformance_gate.py --json corpus/plugins_overview.md
@@ -51,16 +52,31 @@ def parse_frontmatter(text: str):
     if end is None:
         return {}, 0
     meta: dict = {}
-    for ln in lines[1:end]:
+    fm = lines[1:end]
+    i = 0
+    while i < len(fm):
+        ln = fm[i]
         if ":" not in ln:
+            i += 1
             continue
         k, v = ln.split(":", 1)
         k, v = k.strip(), v.strip()
-        if v.startswith("[") and v.endswith("]"):
+        if v.startswith("[") and v.endswith("]"):        # inline array
             inner = v[1:-1].strip()
             meta[k] = [x.strip() for x in inner.split(",") if x.strip()] if inner else []
+        elif v == "":                                    # possible YAML block list
+            items, j = [], i + 1
+            while j < len(fm) and fm[j].lstrip().startswith("- "):
+                items.append(fm[j].lstrip()[2:].strip())
+                j += 1
+            if items:
+                meta[k] = items
+                i = j
+                continue
+            meta[k] = ""
         else:
             meta[k] = v
+        i += 1
     return meta, end + 1
 
 
@@ -94,10 +110,65 @@ def host_of(url: str):
     return m.group(1) if m else None
 
 
+_DOCS_HOSTS = {"claude.com", "code.claude.com", "support.claude.com"}
+
+
+def is_owner_link(url: str, owner_match: str) -> bool:
+    """True only when url points at the concept owner on an allowed docs host
+    (or is a site-relative path), matched at a path/anchor boundary. Prevents
+    substring lookalikes like evil.com/skills/overview or /skills/overview-x."""
+    host = host_of(url)
+    if host is not None and host not in _DOCS_HOSTS:
+        return False
+    needle = "/" + owner_match
+    idx = url.find(needle)
+    if idx < 0:
+        return False
+    end = idx + len(needle)
+    return end == len(url) or url[end] in "/#?)"
+
+
+def segments(line: str):
+    """Yield (text, url) in reading order: url=None for plain prose spans,
+    url=target for a link's visible text. Lets a rule test the FIRST occurrence."""
+    pos = 0
+    for m in LINK_RE.finditer(line):
+        if m.start() > pos:
+            yield line[pos:m.start()], None
+        yield m.group(1), m.group(2)
+        pos = m.end()
+    if pos < len(line):
+        yield line[pos:], None
+
+
+def mask_html_comments(lines):
+    """Blank HTML comments (single- and multi-line), preserving line count, so
+    rules don't match commentary the reader never sees."""
+    out, in_c = [], False
+    for ln in lines:
+        if in_c:
+            if "-->" in ln:
+                out.append(ln[ln.index("-->") + 3:])
+                in_c = False
+            else:
+                out.append("")
+        elif "<!--" in ln:
+            head = ln[:ln.index("<!--")]
+            rest = ln[ln.index("<!--"):]
+            if "-->" in rest:
+                out.append(head + re.sub(r"<!--.*?-->", " ", rest))
+            else:
+                out.append(head)
+                in_c = True
+        else:
+            out.append(ln)
+    return out
+
+
 def check_page(path: Path, reg: dict) -> list[dict]:
     text = path.read_text(encoding="utf-8")
     meta, body_off = parse_frontmatter(text)
-    lines = mask_code(text.splitlines())  # ignore fenced example code in all rules
+    lines = mask_html_comments(mask_code(text.splitlines()))  # ignore fenced code + HTML comments
     body = lines[body_off:]
 
     findings: list[dict] = []
@@ -139,18 +210,20 @@ def check_page(path: Path, reg: dict) -> list[dict]:
             r"\b(" + "|".join(re.escape(a) for a in
                               sorted(spec["aliases"], key=len, reverse=True)) + r")\b",
             re.IGNORECASE)
-        first_idx = next((i for i, ln in enumerate(body)
-                          if alias_pat.search(visible_text(ln))), None)
-        if first_idx is None:
+        hit = None  # (lineno, bridged) for the FIRST occurrence, in reading order
+        for i, ln in enumerate(body):
+            for seg_text, url in segments(ln):
+                if alias_pat.search(visible_text(seg_text)):
+                    hit = (body_off + i + 1,
+                           url is not None and is_owner_link(url, spec["owner_match"]))
+                    break
+            if hit is not None:
+                break
+        if hit is None:
             continue  # concept not used here
-        linked_at_first = any(
-            spec["owner_match"] in url and alias_pat.search(txt)
-            for txt, url in ((m.group(1), m.group(2))
-                             for m in LINK_RE.finditer(body[first_idx]))
-        )
-        if not linked_at_first:
+        if not hit[1]:
             findings.append({
-                "rule": "S4", "line": body_off + first_idx + 1, "subject": cid,
+                "rule": "S4", "line": hit[0], "subject": cid,
                 "detail": f'"{cid}" first appears here but this mention does not link '
                           f'to its owner ({spec["owner_match"]}); the first mention must '
                           f'carry the link (not in assumes/canonical_for)',
@@ -169,19 +242,24 @@ def check_page(path: Path, reg: dict) -> list[dict]:
                 continue
             # A link whose target is a concept's owner is a bridge (S4's domain),
             # not a decision handoff — do not hold it to S5's framing requirement.
-            if any(spec["owner_match"] in url for spec in reg["concepts"].values()):
+            if any(is_owner_link(url, spec["owner_match"]) for spec in reg["concepts"].values()):
                 continue
             base = url.split("#")[0].rstrip("/")
             registered = base in task_pages
             has_anchor = "#" in url
             cue_present = any(c in window for c in cues)
+            label_words = re.findall(r"\w+", m.group(1).lower())
+            generic = {"here", "this", "that", "page", "more", "read", "learn",
+                       "go", "click", "see", "link", "docs", "the", "it"}
+            descriptive = len(label_words) >= 2 and not all(w in generic for w in label_words)
             if registered:
-                # A registered destination is an intentional handoff target;
-                # a descriptive (>=2-word) label frames it adequately.
-                framed = cue_present or len(re.findall(r"\w+", m.group(1))) >= 2
+                # A registered destination is an intentional handoff target, but a
+                # vague all-generic label ("see here") still isn't real framing.
+                framed = cue_present or descriptive
             else:
-                # An arbitrary off-property link needs an ownership cue or a
-                # real summary clause (>=6 words) before it.
+                # An arbitrary off-property link needs an ownership cue or a real
+                # summary clause (>=6 words) before it. This is a PROXY for a
+                # genuine summary + ownership explanation; it cannot prove one.
                 framed = cue_present or len(re.findall(r"\w+", ln[:m.start()])) >= 6
             problems = []
             if not (has_anchor or registered):
@@ -194,9 +272,9 @@ def check_page(path: Path, reg: dict) -> list[dict]:
                     "detail": "off-property handoff: " + "; ".join(problems),
                 })
 
-    # ---- S6: link form (bonus) ----
+    # ---- S6: link form (bonus) ---- (inline code already ignored via masking)
     for idx, ln in enumerate(lines):
-        if "/docs/docs/" in ln:
+        if "/docs/docs/" in re.sub(r"`[^`]*`", " ", ln):
             findings.append({
                 "rule": "S6", "line": idx + 1, "subject": "",
                 "detail": "doubled '/docs/docs/' link prefix",
@@ -265,7 +343,7 @@ def main():
     reg = load_registry(Path(args.registry))
     results = {str(f): check_page(f, reg) for f in collect(args.paths)}
     verdicts = {f: verdict_for(finds, reg) for f, finds in results.items()}
-    # Non-blocking tiers (Ship / Ship with Notes) pass CI; Revise / Reject block.
+    # Non-blocking tiers (Ship / Ship with Notes) exit 0; Revise / Reject block.
     blocking = sum(1 for _v, sev in verdicts.values() if sev in ("revise", "block"))
 
     # Batch verdict: non-compensating across the whole set — the worst page sets
@@ -297,7 +375,7 @@ def main():
                 if fd.get("note"):
                     print(f'        note to owner: {fd["note"]}')
         print(f"\n{blocking} of {len(results)} file(s) block (Revise or Reject); "
-              f"Ship / Ship with Notes pass CI.")
+              f"Ship / Ship with Notes exit 0.")
         print(f"BATCH VERDICT: {batch_verdict.upper()} - {batch_clause}")
 
     sys.exit(min(blocking, 100))

@@ -4,25 +4,27 @@ The rules live in `../standards/plugin_style_guide.md` (S1–S8). This doc does 
 
 ## What ships in Part 3
 
-- **One working vertical slice** that RUNS on the real corpus and shows what it found (with real false positives). Two-deep-beats-four-thin: depth on one check, not a shallow four.
+- **One working vertical slice** that RUNS on a real, bounded corpus and shows what it found (raw output, including real false positives). Two-deep-beats-four-thin: depth on one check, not a shallow four.
 - This design doc, marking the fuller gate as designed, not built.
+
+**Two scopes, kept separate.** This document describes the *designed* gate — the full-estate concept sweep, the classifier, the CI wiring. The *built* prototype is narrower and deliberately bounded: it runs on a **curated 5-page slice** (`fetch_corpus.py`), not a full-estate crawl, and it wires no CI. Where this doc cites the **10-of-17 cross-reference sweep**, that is **design research over a broader page set**, gathered while scoping the standard — it is evidence for *why* S4/S5 are worth enforcing, **not** a result the 5-page prototype reproduces. The prototype's own result is the **62 raw findings** in `../checker/README.md`. Claims of "runs in CI" / "blocks merge" below are **design intent**, not implemented behavior.
 
 ## The prototype — the connective-tissue check (S4 + S5)
 
-Chosen because it is the most deterministic slice AND it measures the fragmentation headline directly, and it has a ready known-positive: the reference sweep found **10 of 17 cross-reference pages name plugins without linking the plugin docs.**
+Chosen because it is the most deterministic slice AND it measures the fragmentation headline directly, and it had a ready known-positive from **design research** (a broader reference sweep, not the built 5-page run): **10 of 17 cross-reference pages name plugins without linking the plugin docs.**
 
 - **S4 — prerequisite bridging.** Inputs: a **concept registry** (core concepts → owning page + aliases) and each page's `assumes:` frontmatter. Check: for every registry concept a page mentions that is not in its `assumes`, require a first-mention link to the owner. Output: line-level violations (`page:line — concept "X" used, not assumed, not linked`).
 - **S5 — handoff presence (deterministic core).** For off-property links (`code.claude.com`, `support.claude.com`) in a decision context: require an adjacent summary + ownership sentence, and a `#anchor` **unless** the target is a registered dedicated task page (per the ownership registry). Flag bare-root / unframed handoffs.
 
-Corpus: pulled from `claude.com/docs/llms.txt`, in-scope surfaces. Runs headless; emits a report keyed by page/line/rule. `assumes:`, `content-type:`, and the registry are the declared inputs (maintained with the pages), so the check can't rot silently.
+Corpus (as designed): the in-scope surfaces enumerated from `claude.com/docs/llms.txt`. **As built**, the prototype runs on a **curated 5-page slice** (`fetch_corpus.py` fetches five named URLs; it does not crawl `llms.txt`). Runs headless; emits a report keyed by page/line/rule. `assumes:`, `content-type:`, and the registry are the declared inputs (maintained with the pages), so the check can't rot silently.
 
-**Known-positives (must fire — R3-style):** the 10 unlinked cross-reference pages; the doubled-`/docs/docs/` home-page links (S6, a cheap bonus); optionally the Chat availability contradiction (S3).
+**Known-positives (must fire — R3-style):** in the *design* set, the 10 unlinked cross-reference pages; in the *built* 5-page run, the doubled-`/docs/docs/` home-page links (S6) and the unlinked-first-mention primitives all fire, and the Chat availability contradiction (S3) surfaces as an owner decision. The `test_gate.py` suite is the machine-checkable version of "must fire."
 
 ## Evaluating the checker (Part 3 asks for this explicitly)
 
 - **False positives.** Gold case from the sweep: **"Enterprise SSO plug-in"** (Microsoft's hyphenated term on entra-broker / connectors-m365) is NOT a Claude plugin — the matcher must separate "plugin" from "plug-in" and generic uses. Plus generic-word collisions ("skill"/"agent" as common nouns). Levers: prefer multi-word canonical terms, first-mention-only, and the `assumes:`/registry inputs. **Tolerance:** tuned toward recall — a missed bridge confuses a reader; a false flag costs a writer ~10s to dismiss — but capped so the report stays credible. State the number and the reason.
-- **Degradation.** Violation count tracked in CI; a PR that adds unbridged concepts raises it and can block merge. Registry-coverage meta-check: concepts frequent across the estate but absent from the registry = the registry going stale.
-- **Anti-staleness ("what keeps this from being a stale artifact in six months?").** Runs in CI on every docs PR; the registry and the `assumes:`/`content-type:` frontmatter live with the pages; a failing gate blocks merge. It fails loudly on every change rather than rotting quietly.
+- **Degradation.** Violation count would be tracked by a CI job (design intent; none is included), so a PR that adds unbridged concepts raises it and can block merge. `test_gate.py` is the built regression check. Registry-coverage meta-check: concepts frequent across the estate but absent from the registry = the registry going stale.
+- **Anti-staleness ("what keeps this from being a stale artifact in six months?").** Design intent: wired into a docs-PR CI job it runs on every change, the registry and the `assumes:`/`content-type:` frontmatter live with the pages, and a failing gate blocks merge — failing loudly rather than rotting quietly. The built guarantee today is determinism plus the `test_gate.py` regression suite.
 
 ## The fuller gate — a page classifier (DESIGNED, not built)
 
@@ -38,4 +40,4 @@ A per-page classifier whose **role assignment selects which checks fire** — an
 
 ## Measurement it feeds (Part 1 §4)
 
-Gate metrics are the **leading** indicator (unbridged-prerequisite count, unframed-handoff count, % pages clean — in CI). The **structural journey audit** (can a reader traverse discovery→build→…→maintain in-estate with every concept bridged and no unframed off-property hop?) is the coherence measure. **Telemetry** is ground truth (off-property exit rate on plugin pages, internal-search zero-result rate, "was this helpful", plugin-tagged tickets). The gate predicts; telemetry confirms.
+Gate metrics are the **leading** indicator (unbridged-prerequisite count, unframed-handoff count, % pages clean — surfaced by the gate, reported by CI once wired). The **structural journey audit** (can a reader traverse discovery→build→…→maintain in-estate with every concept bridged and no unframed off-property hop?) is the coherence measure. **Telemetry** is ground truth (off-property exit rate on plugin pages, internal-search zero-result rate, "was this helpful", plugin-tagged tickets). The gate predicts; telemetry confirms.

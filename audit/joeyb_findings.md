@@ -6,6 +6,8 @@ The findings below keep that distinction explicit: the observations are strong e
 
 These started as my independent scan findings. I'm keeping that provenance visible so I can compare them with the assistant's audit after both arms have formed, instead of letting one quietly shape the other.
 
+**This file is working research, not the Part 1 deliverable.** The finished audit is [`part1_audit_memo.md`](part1_audit_memo.md); this document is the raw independent-arm input that fed it. The `Current confidence` / `Current status` / `Canonical URLs still needed` fields below are deliberate working-research markers — they record what a next evidence pass would still nail down, and are not open gaps in the memo.
+
 ## Scope decision
 
 After scanning connectors, skills, and plugins, connectors currently look like the healthiest part of the group. The left navigation is fairly complete, and the documentation covers most of the lifecycle I would expect: what MCPs are, how to build and bundle a connector, authentication options, testing, troubleshooting, publishing, and some higher-level integrations.

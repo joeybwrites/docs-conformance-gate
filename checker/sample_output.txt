@@ -17,11 +17,20 @@ SHIP WITH NOTES fail_s6_doubled_prefix.md  (2 finding(s))
     S6  line 9: doubled '/docs/docs/' link prefix
     S6  line 11: doubled '/docs/docs/' link prefix
 SHIP            pass_overview.md
+SHIP            block_array_frontmatter.md
 SHIP            code_fence_examples.md
+SHIP            html_comment.md
+SHIP            inline_code.md
+REVISE          lookalike_url.md  (1 finding(s))
+    S4  line 9 [skill]: "skill" first appears here but this mention does not link to its owner (skills/overview); the first mention must carry the link (not in assumes/canonical_for)
 REVISE          mixed_note_and_block.md  (2 finding(s))
     S6  line 11: doubled '/docs/docs/' link prefix
     S3  line 15 [chat-availability-settled]: possible contradiction (owner decision): Asserts plugin availability in Chat as settled fact, but the matrix records Chat availability as a LIVE contradiction between the support guidance and cowork/guide/plugins.
         note to owner: Do not state Chat availability as settled until the product owner resolves the conflict. Describe it as unresolved and link the support matrix.
+REVISE          same_line_first_mention.md  (1 finding(s))
+    S4  line 9 [skill]: "skill" first appears here but this mention does not link to its owner (skills/overview); the first mention must carry the link (not in assumes/canonical_for)
+REVISE          vague_s5_label.md  (1 finding(s))
+    S5  line 9 [https://support.claude.com/en/articles/13837440-use-plugins-in-claude]: off-property handoff: no ownership/summary framing nearby
 REVISE          verdict_owner_decision.md  (1 finding(s))
     S3  line 27 [chat-availability-settled]: possible contradiction (owner decision): Asserts plugin availability in Chat as settled fact, but the matrix records Chat availability as a LIVE contradiction between the support guidance and cowork/guide/plugins.
         note to owner: Do not state Chat availability as settled until the product owner resolves the conflict. Describe it as unresolved and link the support matrix.
@@ -31,7 +40,7 @@ SHIP            verdict_ship.md
 SHIP WITH NOTES verdict_ship_with_notes.md  (1 finding(s))
     S6  line 31: doubled '/docs/docs/' link prefix
 
-6 of 11 file(s) block (Revise or Reject); Ship / Ship with Notes pass CI.
+9 of 17 file(s) block (Revise or Reject); Ship / Ship with Notes exit 0.
 BATCH VERDICT: REVISE - the batch is blocked; at least one page must be revised before merge.
 ```
 
@@ -105,22 +114,20 @@ REVISE          plugins_submit.md  (11 finding(s))
     S5  line 55 [https://support.claude.com/en/articles/13145358-anthropic-software-directory-policy]: off-property handoff: no #anchor and not a registered task page; no ownership/summary framing nearby
     S5  line 91 [https://code.claude.com/docs/en/plugins]: off-property handoff: no #anchor and not a registered task page
 
-5 of 5 file(s) block (Revise or Reject); Ship / Ship with Notes pass CI.
+5 of 5 file(s) block (Revise or Reject); Ship / Ship with Notes exit 0.
 BATCH VERDICT: REVISE - the batch is blocked; at least one page must be revised before merge.
 ```
 
 ## Input-contract demo: before/after meta-doc (FM announces missing frontmatter)
 ```
-REVISE          plugin_overview_before_after.md  (7 finding(s))
+REVISE          plugin_overview_before_after.md  (5 finding(s))
     FM  line 1: frontmatter contract: no frontmatter block found. Exemptions are inactive, so S4 findings here may be phantoms.
     S4  line 5 [plugin]: "plugin" first appears here but this mention does not link to its owner (plugins/overview); the first mention must carry the link (not in assumes/canonical_for)
-    S4  line 11 [skill]: "skill" first appears here but this mention does not link to its owner (skills/overview); the first mention must carry the link (not in assumes/canonical_for)
-    S4  line 11 [connector]: "connector" first appears here but this mention does not link to its owner (connectors/overview); the first mention must carry the link (not in assumes/canonical_for)
-    S4  line 11 [slash command]: "slash command" first appears here but this mention does not link to its owner (plugins-reference#skills); the first mention must carry the link (not in assumes/canonical_for)
-    S4  line 11 [sub-agent]: "sub-agent" first appears here but this mention does not link to its owner (plugins-reference#agents); the first mention must carry the link (not in assumes/canonical_for)
-    S4  line 82 [hook]: "hook" first appears here but this mention does not link to its owner (plugins-reference#hooks); the first mention must carry the link (not in assumes/canonical_for)
+    S4  line 103 [hook]: "hook" first appears here but this mention does not link to its owner (plugins-reference#hooks); the first mention must carry the link (not in assumes/canonical_for)
+    S4  line 107 [skill]: "skill" first appears here but this mention does not link to its owner (skills/overview); the first mention must carry the link (not in assumes/canonical_for)
+    S4  line 107 [connector]: "connector" first appears here but this mention does not link to its owner (connectors/overview); the first mention must carry the link (not in assumes/canonical_for)
 
-1 of 1 file(s) block (Revise or Reject); Ship / Ship with Notes pass CI.
+1 of 1 file(s) block (Revise or Reject); Ship / Ship with Notes exit 0.
 BATCH VERDICT: REVISE - the batch is blocked; at least one page must be revised before merge.
 ```
 
